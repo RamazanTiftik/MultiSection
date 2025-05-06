@@ -1,0 +1,1 @@
+export const api_key = "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"

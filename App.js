@@ -2,9 +2,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import AIChatScreen from "./screen/AIChatScreen"
+import StatisticsScreen from "./screen/StatisticsScreen"
 import MyProfileScreen from "./screen/MyProfileScreen"
 import { Ionicons } from '@expo/vector-icons';
+import SignInScreen from './screen/LoginPages/SignInScreen';
+import SignUpScreen from './screen/LoginPages/SignUpScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -13,7 +15,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName='Home'
+        initialRouteName='SignIn'
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let iconName = route.name === 'Home' ? 'home' : 'settings';
@@ -23,8 +25,15 @@ export default function App() {
           tabBarInactiveTintColor: 'gray',
         })}
       >
-        <Tab.Screen name="Home" component={AIChatScreen} />
+
+        <Tab.Screen name='SignIn' component={SignInScreen} />
+
+        <Tab.Screen name='SignUp' component={SignUpScreen} />
+
+        <Tab.Screen name="Home" component={StatisticsScreen} />
+
         <Tab.Screen name="MyProfile" component={MyProfileScreen} />
+
       </Tab.Navigator>
     </NavigationContainer>
   );
