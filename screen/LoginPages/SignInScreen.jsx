@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { themes } from '../../theme/Themes'
 import CustomContainer from '../../component/CustomContainer'
@@ -7,7 +7,7 @@ import TextView from '../../component/TextView'
 import CustomIcons from '../../component/CustomIcons'
 import CustomButton from '../../component/CustomButton'
 
-const SignInScreen = ({ navigation }) => {
+const SignInScreen = ({ navigation, onLogin }) => {
 
   //theme
   const text = themes.textTheme.text
@@ -26,18 +26,31 @@ const SignInScreen = ({ navigation }) => {
   //SignUp button handle
   const signInBtnHandle = () => {
 
-    if (!email) {
-      setHasEmailError(true)
-      return
-    } else if (!password) {
-      setHasPasswordError(true)
-      return
+    if (!email && !password) {
+      if (!email) {
+        setHasEmailError(true)
+      }
+      if (!password) {
+        setHasPasswordError(true)
+      }
 
     } else {
       console.log(email)
+      onLogin()
     }
+  }
+
+  //register button handle
+  const registerHandle = () => {
+    navigation.navigate("SignUp")
+  }
+
+  //forgot password handle
+  const forgotPasswordHandle = () => {
+    console.log("234")
 
   }
+
 
   //Input fields
   function updateInput(inputType, enteredValue) {
@@ -49,7 +62,7 @@ const SignInScreen = ({ navigation }) => {
 
       case 'password':
         setPassword(enteredValue);
-        if (enteredValue.trim() !== "") setHasEmailError(false);
+        if (enteredValue.trim() !== "") setHasPasswordError(false);
         break;
 
     }
@@ -95,6 +108,13 @@ const SignInScreen = ({ navigation }) => {
             label={"Şifrenizi girin"}
             hasError={hasPasswordError}
           />
+
+          <TouchableOpacity
+            onPress={forgotPasswordHandle}
+            style={{ justifyContent: "flex-end", alignItems: "flex-end", marginTop: 10, marginRight: 10 }}
+          >
+            <TextView label={"Şifremi Unuttum"} textStyle={styles.forgotPasswordText} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -102,6 +122,12 @@ const SignInScreen = ({ navigation }) => {
       <View style={styles.btn}>
         <CustomButton btnTitle={"Giriş Yap"} onPressAction={signInBtnHandle} />
       </View>
+
+      <TouchableOpacity
+        onPress={registerHandle}
+      >
+        <Text style={styles.registerText}>Hesabınız Yok Mu?</Text>
+      </TouchableOpacity>
 
     </CustomContainer>
   )
@@ -111,15 +137,26 @@ export default SignInScreen
 
 const styles = StyleSheet.create({
   btn: {
-    marginTop: 30
+    marginTop: 25
   },
   staticText: {
     marginBottom: 15
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 130,
+    height: 130,
     borderRadius: 150,
-    marginBottom: 30
+    marginBottom: 30,
+  },
+  registerText: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 30,
+    marginTop: 20,
+    color: "blue"
+  },
+  forgotPasswordText: {
+    color: "blue",
+    fontWeight: "500",
   }
 })

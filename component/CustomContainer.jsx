@@ -41,8 +41,8 @@ export default CustomContainer;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: "center",
         alignItems: "center",
-
+        backgroundColor: "#fff"
     },
 });

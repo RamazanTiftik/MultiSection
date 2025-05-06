@@ -53,7 +53,7 @@ const staticCss = {
 
 const card = {
     cardView: {
-        backgroundColor: "#fff",
+        backgroundColor: "#F7F7F7",
         padding: 15,
         borderRadius: 10,
         marginBottom: 15,

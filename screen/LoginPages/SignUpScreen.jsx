@@ -7,7 +7,7 @@ import { themes } from '../../theme/Themes'
 import CustomButton from '../../component/CustomButton'
 import CustomContainer from '../../component/CustomContainer'
 
-const SignUpScreen = ({navigation}) => {
+const SignUpScreen = ({ navigation }) => {
 
     //theme
     const text = themes.textTheme.text
@@ -58,17 +58,17 @@ const SignUpScreen = ({navigation}) => {
 
     //SignUp button handle
     const signUpBtnHandle = () => {
+        if (!email && !password && !confirmPassword) {
+            if (!email) {
+                setHasEmailError(true)
+            }
+            if (!password) {
+                setHasPasswordError(true)
+            }
+            if (!confirmPassword) {
+                setConfirmHasPasswordError(true)
 
-        if (!email) {
-            setHasEmailError(true)
-            return
-        } else if (!password) {
-            setHasPasswordError(true)
-            return
-        } else if (!confirmPassword) {
-            setConfirmHasPasswordError(true)
-            return
-
+            }
         } else {
             console.log(email)
         }

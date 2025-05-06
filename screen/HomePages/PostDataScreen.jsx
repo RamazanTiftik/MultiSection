@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const AIChatScreen = () => {
+const PostDataScreen = () => {
   return (
     <View>
-      <Text>AIChatScreen</Text>
+      <Text>PostDataScreen</Text>
     </View>
   )
 }
 
-export default AIChatScreen
+export default PostDataScreen
 
 const styles = StyleSheet.create({})
