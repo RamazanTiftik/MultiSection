@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -17,7 +17,7 @@ const CustomContainer = ({ children }) => {
     //themes
     const conPaddingHorizontal = themes.staticCss.container.paddingHorizontal
     const secondaryColor = themes.colorTheme.secondary.color
-
+    
 
     return (
         <KeyboardAvoidingView

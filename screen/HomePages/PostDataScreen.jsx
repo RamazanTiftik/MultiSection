@@ -1,4 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import CustomContainer from '../../component/CustomContainer'
 import CustomFlatlist from '../../component/CustomFlatlist'
@@ -8,6 +9,7 @@ import CustomButton from '../../component/CustomButton'
 import CustomIcons from '../../component/CustomIcons'
 import TextView from '../../component/TextView'
 import Input from '../../component/Input'
+
 
 const PostDataScreen = ({ navigation }) => {
 
@@ -38,9 +40,11 @@ const PostDataScreen = ({ navigation }) => {
 
   //input states
   const [description, setDescription] = useState("")
+  const [amount, setAmount] = useState("")
 
   //input error
   const [hasDescriptionError, setHasDescriptionError] = useState(false)
+  const [hasAmountError, setHasAmountError] = useState(false)
 
 
   const incomeButtonHandle = () => {
@@ -59,6 +63,11 @@ const PostDataScreen = ({ navigation }) => {
         if (enteredValue.trim() !== "") setHasDescriptionError(false);
         break;
 
+      case 'amount':
+        setAmount(enteredValue);
+        if (enteredValue.trim() !== "") setHasAmountError(false);
+        break;
+
     }
   }
 
@@ -72,16 +81,12 @@ const PostDataScreen = ({ navigation }) => {
           data={months}
           selectedValue={selectedMonth}
           onValueChange={setSelectedMonth}
-          onDropdownOpen={() => setDropdownVisible(true)}
-          onDropdownClose={() => setDropdownVisible(false)}
         />
 
         <CustomFlatlist
           data={years}
           selectedValue={selectedYear}
           onValueChange={setSelectedYear}
-          onDropdownOpen={() => setDropdownVisible(true)}
-          onDropdownClose={() => setDropdownVisible(false)}
         />
       </View>
 
@@ -90,28 +95,44 @@ const PostDataScreen = ({ navigation }) => {
         {/* Up Bar Buttons */}
         <View style={styles.upBar}>
 
-          <TouchableOpacity
-            style={[styles.btn, { backgroundColor: selectedButton === "Gelir" ? "red" : tertiaryColor }]}
-            onPress={incomeButtonHandle}
+          {/* Gelir Butonu */}
+          <LinearGradient
+            colors={selectedButton === "Gelir" ? ['#56ab2f', '#a8e063'] : [tertiaryColor, tertiaryColor]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientBtn}
           >
-            <Text style={selectedButton === "Gelir" ? styles.selectedBtnText : styles.btnText}>{"Gelir"}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.touchable}
+              onPress={incomeButtonHandle}
+            >
+              <Text style={selectedButton === "Gelir" ? styles.selectedBtnText : styles.btnText}>{"Gelir"}</Text>
+            </TouchableOpacity>
+          </LinearGradient>
 
-          <TouchableOpacity
-            style={[styles.btn, { backgroundColor: selectedButton === "Gider" ? "red" : tertiaryColor }]}
-            onPress={outcomeButtonHandle}
+          {/* Gider Butonu */}
+          <LinearGradient
+            colors={selectedButton === "Gider" ? ['#e74c3c', '#f1948a'] : [tertiaryColor, tertiaryColor]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientBtn}
           >
-            <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.touchable}
+              onPress={outcomeButtonHandle}
+            >
+              <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
+            </TouchableOpacity>
+          </LinearGradient>
 
         </View>
 
 
         {/*  */}
-        <View>
+        <View style={card}>
 
-          {/* Username */}
-          <View style={[card, { flexDirection: "row", paddingRight: 55 }]}>
+          {/* Description */}
+          <View style={styles.inputCard}>
             <CustomIcons icon={"Username"} />
             <View style={styles.inputContainer}>
               <TextView label={"Açıklama:"} textStyle={text} />
@@ -123,6 +144,42 @@ const PostDataScreen = ({ navigation }) => {
               />
             </View>
           </View>
+
+
+          {/* Amount */}
+          <View style={styles.inputCard}>
+            <CustomIcons icon={"Username"} />
+            <View style={[styles.inputContainer]}>
+              <TextView label={"Miktar:"} textStyle={text} />
+              <Input
+                onUpdateValue={updateInput.bind(this, "amount")}
+                value={amount}
+                label={"0.00$"}
+                hasError={hasAmountError}
+              />
+            </View>
+          </View>
+
+
+          {/* Birth Date */}
+          <View style={styles.inputCard}>
+            <CustomIcons icon={"Date"} />
+
+            <View>
+              <TextView label={"Doğum Tarihi:"} textStyle={text} />
+              <Pressable onPress={"showDatePicker"} style={styles.dateInput}>
+                <Text style={text}>{"inputBirthDate" || "Doğum Tarihini Seçin"}</Text>
+              </Pressable>
+
+              {/* <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+              /> */}
+            </View>
+          </View>
+
 
         </View>
 
@@ -173,5 +230,20 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     fontSize: 18,
     color: "#000000"
+  },
+  gradientBtn: {
+    borderRadius: 15,
+    width: 175,
+    height: 40,
+  },
+  touchable: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 15
+  },
+  inputCard: {
+    flexDirection: "row",
+    marginBottom: 20
   }
 })

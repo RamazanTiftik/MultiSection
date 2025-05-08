@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient'
 import React, { useState, useRef } from 'react';
 import {
     View,
@@ -146,6 +147,17 @@ const styles = StyleSheet.create({
         borderBottomWidth: 0.5,
         borderBottomColor: '#eee',
     },
+    gradientBtn: {
+        borderRadius: 15,
+        width: "100%",
+        height: "100%",
+    },
+    touchable: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 15
+    }
 });
 
 export default CustomFlatList;
