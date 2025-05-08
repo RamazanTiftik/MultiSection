@@ -10,6 +10,7 @@ import SignUpScreen from './screen/LoginPages/SignUpScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import PostDataScreen from './screen/HomePages/PostDataScreen';
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 const Tab = createBottomTabNavigator();
@@ -29,58 +30,69 @@ function CustomTabBarButton({ children, onPress }) {
     </TouchableOpacity>
   );
 }
-
+//griyi kaldır üstten padding ver
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         tabBarShowLabel: false,
+        headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          backgroundColor: '#ffffff',
-          borderTopWidth: 0,
-          height: 60,
+          backgroundColor: '#fff',
+          height: 70,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
           elevation: 10,
+          justifyContent: "center",
+          paddingTop: 15
         },
-        headerShown: false,
-      }}
+      })}
     >
+      {/* Home */}
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={24} />
-          )
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name="home" size={focused ? 30 : 24} color={focused ? '#007AFF' : 'gray'} />
+          ),
         }}
       />
+
+      {/* Post - Özel Ortadaki Buton */}
       <Tab.Screen
         name="Post"
         component={PostDataScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="add" color="#fff" size={32} />
+          tabBarIcon: ({ focused }) => (
+            <LinearGradient
+              colors={['#00c6ff', '#0072ff']}
+              style={styles.postButton}
+            >
+              <Ionicons name="add" size={32} color="#fff" />
+            </LinearGradient>
           ),
-          tabBarButton: (props) => (
-            <CustomTabBarButton {...props} />
-          )
         }}
       />
+
+      {/* Profile */}
       <Tab.Screen
         name="MyProfile"
         component={MyProfileScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" color={color} size={24} />
-          )
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name="person" size={focused ? 30 : 24} color={focused ? '#007AFF' : 'gray'} />
+          ),
         }}
       />
     </Tab.Navigator>
   );
 }
 
+/* false yapacaksın usestate içindeki true yu ********** */
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // <- Giriş durumu
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // <- Giriş durumu
 
   return (
     <NavigationContainer>
@@ -138,5 +150,14 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#fff',
     transform: [{ scale: 1.05 }],
+  },
+  postButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 155,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 60,
+    elevation: 8,
   },
 });

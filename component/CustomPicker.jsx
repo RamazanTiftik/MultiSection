@@ -7,7 +7,9 @@ import {
     FlatList,
     StyleSheet,
     TouchableWithoutFeedback,
-    Keyboard
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform
 } from 'react-native';
 
 const CustomPicker = ({ data, selectedValue, onValueChange, placeholder, selectedItem }) => {
@@ -16,8 +18,7 @@ const CustomPicker = ({ data, selectedValue, onValueChange, placeholder, selecte
 
 
     const formatItem = (item) => ({
-        label: item.name || item.label || selectedValue || "",
-        value: item.name || item.value || selectedValue || "",
+        value: item.value || selectedValue || "",
         id: String(item.id || item.key),
     });
 
@@ -36,10 +37,13 @@ const CustomPicker = ({ data, selectedValue, onValueChange, placeholder, selecte
             : selectedItem.label || placeholder;
 
     } else { //if selectedItem is not passed, use selectedValue to find the label
+        console.log("else")
         selectedLabel = selectedValue?.value
-            ? formattedData.find(d => d.value === selectedValue.value)?.label
-            : selectedValue?.name ? formattedData.find(d => d.value === selectedValue.name)?.label
-                : placeholder
+            ? formattedData.find(d => d.value === selectedValue.value)?.value
+            : placeholder
+
+        console.log(selectedLabel)
+        console.log(selectedValue)
     }
 
 
@@ -103,7 +107,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 8,
-        width: 280,
+        width: 150,
+        height: 40,
         backgroundColor: "#dee2e6",
         marginTop: 3,
         paddingRight: 10

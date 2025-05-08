@@ -3,13 +3,14 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    SafeAreaView,
     StyleSheet,
     TouchableWithoutFeedback,
     Keyboard,
     View,
 } from 'react-native';
 import { themes } from '../theme/Themes';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 const CustomContainer = ({ children }) => {
 
@@ -24,12 +25,12 @@ const CustomContainer = ({ children }) => {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 110 }}
                     keyboardShouldPersistTaps="handled"
                 >
-                    <View style={[styles.container, { paddingHorizontal: conPaddingHorizontal }]}>
+                    <SafeAreaView style={[styles.container, { paddingHorizontal: conPaddingHorizontal }]}>
                         {children}
-                    </View>
+                    </SafeAreaView>
                 </ScrollView>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
@@ -41,8 +42,7 @@ export default CustomContainer;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#fff"
+        backgroundColor: "#fff",
     },
 });
