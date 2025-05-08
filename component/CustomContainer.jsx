@@ -16,6 +16,7 @@ const CustomContainer = ({ children }) => {
 
     //themes
     const conPaddingHorizontal = themes.staticCss.container.paddingHorizontal
+    const secondaryColor = themes.colorTheme.secondary.color
 
 
     return (
@@ -28,7 +29,7 @@ const CustomContainer = ({ children }) => {
                     contentContainerStyle={{ flexGrow: 1, paddingBottom: 110 }}
                     keyboardShouldPersistTaps="handled"
                 >
-                    <SafeAreaView style={[styles.container, { paddingHorizontal: conPaddingHorizontal }]}>
+                    <SafeAreaView style={[styles.container, { paddingHorizontal: conPaddingHorizontal, backgroundColor: secondaryColor }]}>
                         {children}
                     </SafeAreaView>
                 </ScrollView>
@@ -43,6 +44,5 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        backgroundColor: "#fff",
     },
 });

@@ -2,7 +2,9 @@ const textTheme = {
 
     //casual
     text: {
-        fontSize: 16
+        fontSize: 16,
+        color: "#111111",
+        fontWeight: "500"
     },
 
     //btn text
@@ -17,13 +19,13 @@ const textTheme = {
 const colorTheme = {
     //backgrounds
     primary: {
-        color: "#2D336B"
+        color: "#D4F6FF"
     },
     secondary: {
-        color: "#7886C7"
+        color: "#C6E7FF"
     },
     tertiary: {
-        color: "#A9B5DF"
+        color: "#FBFBFB"
     },
     quaternary: {
         color: "#A9B5DF"
@@ -63,8 +65,8 @@ const card = {
         shadowRadius: 4,
         elevation: 3,
         width: "100%",
-        borderLeftWidth: 5,
-        borderLeftColor: "#A9B5DF",
+        /*   borderLeftWidth: 5,
+          borderLeftColor: "#A9B5DF", */
     }
 }
 
