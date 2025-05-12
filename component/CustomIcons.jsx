@@ -43,7 +43,7 @@ const CustomIcons = ({ icon }) => {
                 ) : icon === "Role" ? (
                     <FontAwesome style={styles.titleIcon} name="users" size={titleIconSize} color={secondaryColor} />
                 ) : icon === "Username" ? (
-                    <FontAwesome style={styles.titleIcon} name="user" size={titleIconSize} color={secondaryColor} />
+                    <FontAwesome style={styles.titleIcon} name="user" size={80} color={secondaryColor} />
                 ) : icon === "Password" ? (
                     <MaterialIcons name="password" size={titleIconSize} color={secondaryColor} style={{ marginRight: 5 }} />
                 ) : icon === "Task" ? (

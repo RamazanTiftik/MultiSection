@@ -17,6 +17,12 @@ const textTheme = {
         fontSize: 18,
         fontWeight: "500",
         color: "#111111"
+    },
+
+    profileText: {
+        fontSize: 18,
+        fontWeight: "500",
+        color: "blue"
     }
 
 }

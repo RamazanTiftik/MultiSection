@@ -203,7 +203,7 @@ const PostDataScreen = ({ navigation }) => {
 
               {/* Description */}
               <View style={styles.inputCard}>
-                <CustomIcons icon={"Username"} />
+                <CustomIcons icon={"Description"} />
                 <View style={styles.inputContainer}>
                   <TextView label={"Açıklama:"} textStyle={text} />
                   <Input
@@ -218,7 +218,7 @@ const PostDataScreen = ({ navigation }) => {
 
               {/* Amount */}
               <View style={styles.inputCard}>
-                <CustomIcons icon={"Username"} />
+                <CustomIcons icon={"Description"} />
                 <View style={[styles.inputContainer]}>
                   <TextView label={"Miktar:"} textStyle={text} />
                   <Input
@@ -296,7 +296,7 @@ const PostDataScreen = ({ navigation }) => {
 
               {/* Description */}
               <View style={styles.inputCard}>
-                <CustomIcons icon={"Username"} />
+                <CustomIcons icon={"Description"} />
                 <View style={styles.inputContainer}>
                   <TextView label={"Açıklama:"} textStyle={text} />
                   <Input
@@ -311,7 +311,7 @@ const PostDataScreen = ({ navigation }) => {
 
               {/* Amount */}
               <View style={styles.inputCard}>
-                <CustomIcons icon={"Username"} />
+                <CustomIcons icon={"Description"} />
                 <View style={[styles.inputContainer]}>
                   <TextView label={"Miktar:"} textStyle={text} />
                   <Input
@@ -415,7 +415,7 @@ const PostDataScreen = ({ navigation }) => {
             renderItem={({ item }) => (
               <View style={card}>
                 <AccountTransactionsRow
-                  title={years.value}
+                  title={[]}
                   amount={amount}
                   date={selectedDate}
                   type={selectedButton}
