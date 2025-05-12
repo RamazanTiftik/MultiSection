@@ -10,6 +10,7 @@ import CustomIcons from '../../component/CustomIcons'
 import TextView from '../../component/TextView'
 import Input from '../../component/Input'
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import AccountTransactionsRow from '../../component/FlatListRow/AccountTransactionsRow'
 
 
 
@@ -404,22 +405,24 @@ const PostDataScreen = ({ navigation }) => {
 
         {/* Account Transactions */}
         <View style={styles.bottomCard}>
-          <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
-
-          <View style={card}>
-            <FlatList
-              data={years}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.option}
-                  onPress={() => handleSelect(item)}
-                >
-                  <Text>{item.value}</Text>
-                </TouchableOpacity>
-              )}
-            />
+          <View style={{ marginBottom: 10 }}>
+            <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
           </View>
+
+          <FlatList
+            data={years}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={card}>
+                <AccountTransactionsRow
+                  title={years.value}
+                  amount={amount}
+                  date={selectedDate}
+                  type={selectedButton}
+                />
+              </View>
+            )}
+          />
         </View>
 
 
