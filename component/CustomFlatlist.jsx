@@ -19,6 +19,7 @@ const CustomFlatList = ({
     placeholder,
     onDropdownOpen,
     onDropdownClose,
+    width
 }) => {
     const [visible, setVisible] = useState(false);
     const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
@@ -61,7 +62,7 @@ const CustomFlatList = ({
         <>
             <TouchableOpacity
                 ref={inputRef}
-                style={styles.input}
+                style={[styles.input, { width: width ? width : 150 }]}
                 onPress={toggleDropdown}
                 activeOpacity={0.8}
             >
@@ -71,14 +72,14 @@ const CustomFlatList = ({
                     </Text>
                     <Text style={styles.arrow}>▼</Text>
                 </View>
-            </TouchableOpacity>
+            </TouchableOpacity >
 
             {visible && (
                 <Modal transparent animationType="none">
                     <TouchableWithoutFeedback onPress={() => setVisible(false)}>
                         <View style={styles.fullScreen}>
                             <View style={[
-                                styles.dropdown,
+                                styles.dropdown, { width: width ? width : 150 },
                                 {
                                     position: 'absolute',
                                     top: dropdownPos.top,
@@ -100,8 +101,9 @@ const CustomFlatList = ({
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
-                </Modal>
-            )}
+                </Modal >
+            )
+            }
         </>
     );
 };
@@ -115,10 +117,8 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         backgroundColor: "#dee2e6",
         height: 40,
-        width: 150,
     },
     dropdown: {
-        width: 150,
         backgroundColor: '#fff',
         borderWidth: 1,
         borderColor: '#ccc',

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 const Input = ({ label, keyboardType, onUpdateValue, value, secure, maxLength, hasError }) => {
 
   const [isFocused, setIsFocused] = useState(false);
-
+  
   return (
     <View>
       <TextInput

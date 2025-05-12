@@ -11,6 +11,12 @@ const textTheme = {
     btnText: {
         fontSize: 16,
         color: "white"
+    },
+
+    titleTxt: {
+        fontSize: 18,
+        fontWeight: "500",
+        color: "#111111"
     }
 
 }

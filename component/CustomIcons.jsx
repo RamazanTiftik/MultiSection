@@ -70,6 +70,8 @@ const CustomIcons = ({ icon }) => {
                     <MaterialCommunityIcons name="clock" size={23} color={secondaryColor} style={{ marginRight: 2 }} />
                 ) : icon === "Clock-End" ? (
                     <MaterialCommunityIcons name="clock-alert" size={23} color={secondaryColor} style={{ marginRight: 2 }} />
+                ) : icon === "Bank" ? (
+                    <FontAwesome name="bank" size={titleIconSize} color={secondaryColor} />
                 ) : null
             }
         </View>

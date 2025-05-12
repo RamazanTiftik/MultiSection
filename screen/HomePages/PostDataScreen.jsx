@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import CustomContainer from '../../component/CustomContainer'
 import CustomFlatlist from '../../component/CustomFlatlist'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -9,6 +9,8 @@ import CustomButton from '../../component/CustomButton'
 import CustomIcons from '../../component/CustomIcons'
 import TextView from '../../component/TextView'
 import Input from '../../component/Input'
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+
 
 
 const PostDataScreen = ({ navigation }) => {
@@ -18,6 +20,7 @@ const PostDataScreen = ({ navigation }) => {
   const tertiaryColor = themes.colorTheme.tertiary.color
   const text = themes.textTheme.text
   const card = themes.card.cardView
+  const titleTxt = themes.textTheme.titleTxt
 
   //button
   const [selectedButton, setSelectedButton] = useState("Gelir")
@@ -33,10 +36,20 @@ const PostDataScreen = ({ navigation }) => {
     { id: 1, value: "2023" }, { id: 2, value: "2024" },
     { id: 3, value: "2025" }, { id: 4, value: "2026" }
   ]
+  const banks = [
+    { id: 1, value: "Akbank" }, { id: 2, value: "Yapı Kredi" }, { id: 3, value: "Garanti" },
+    { id: 4, value: "Qnb" }, { id: 5, value: "Ziraat" }, { id: 6, value: "Vakıfbank" }
+  ]
+  const categories = [
+    { id: 1, value: "Market" }, { id: 2, value: "Giysi" }, { id: 3, value: "Kozmetik" },
+    { id: 4, value: "Eğlence" }, { id: 5, value: "Ev Kirası" }, { id: 6, value: "Diğer" }
+  ]
 
   //datas local state
   const [selectedMonth, setSelectedMonth] = useState(months[0])
   const [selectedYear, setSelectedYear] = useState(years[2])
+  const [selectedBank, setSelectedBank] = useState(banks[0])
+  const [selectedCategory, setSelectedCategory] = useState(categories[0])
 
   //input states
   const [description, setDescription] = useState("")
@@ -46,13 +59,55 @@ const PostDataScreen = ({ navigation }) => {
   const [hasDescriptionError, setHasDescriptionError] = useState(false)
   const [hasAmountError, setHasAmountError] = useState(false)
 
+  //date time picker 
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
 
+
+  //top bar buttons
   const incomeButtonHandle = () => {
     setSelectedButton("Gelir")
   }
 
   const outcomeButtonHandle = () => {
     setSelectedButton("Gider")
+  }
+
+
+  //remove data when button focus is changed
+  useEffect(() => {
+    setSelectedBank(banks[0])
+    setSelectedDate("")
+    setSelectedCategory(categories[0])
+    setSelectedMonth(months[0])
+    setSelectedYear(years[0])
+    setDescription("")
+    setAmount("")
+  }, [selectedButton])
+
+
+  //date time picker
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+  const handleConfirm = (date) => {
+    setSelectedDate(date.toLocaleDateString());
+    hideDatePicker();
+  };
+
+
+  //add btn handle
+  const addButtonHandle = () => {
+    if (!amount || !selectedDate) {
+      if (!amount) {
+        setHasAmountError(true)
+      } else if (!selectedDate) {
+        //maybe pop-up or toast message
+      }
+
+    } else {
+      //make it 
+      console.log("bas")
+    }
   }
 
 
@@ -64,7 +119,16 @@ const PostDataScreen = ({ navigation }) => {
         break;
 
       case 'amount':
-        setAmount(enteredValue);
+        // Sadece sayılar ve tek bir nokta (.) izin ver
+        const filtered = enteredValue.replace(/[^0-9.]/g, '');
+
+        // Eğer birden fazla nokta varsa sadece ilkini bırak
+        const parts = filtered.split('.');
+        const sanitized = parts.length > 2
+          ? parts[0] + '.' + parts.slice(1).join('').replace(/\./g, '')
+          : filtered;
+
+        setAmount(sanitized);
         if (enteredValue.trim() !== "") setHasAmountError(false);
         break;
 
@@ -95,7 +159,7 @@ const PostDataScreen = ({ navigation }) => {
         {/* Up Bar Buttons */}
         <View style={styles.upBar}>
 
-          {/* Gelir Butonu */}
+          {/* Income Butonu */}
           <LinearGradient
             colors={selectedButton === "Gelir" ? ['#56ab2f', '#a8e063'] : [tertiaryColor, tertiaryColor]}
             start={{ x: 0, y: 0 }}
@@ -110,7 +174,7 @@ const PostDataScreen = ({ navigation }) => {
             </TouchableOpacity>
           </LinearGradient>
 
-          {/* Gider Butonu */}
+          {/* Outcome Butonu */}
           <LinearGradient
             colors={selectedButton === "Gider" ? ['#e74c3c', '#f1948a'] : [tertiaryColor, tertiaryColor]}
             start={{ x: 0, y: 0 }}
@@ -128,60 +192,236 @@ const PostDataScreen = ({ navigation }) => {
         </View>
 
 
-        {/*  */}
-        <View style={card}>
+        {/* Main Card */}
 
-          {/* Description */}
-          <View style={styles.inputCard}>
-            <CustomIcons icon={"Username"} />
-            <View style={styles.inputContainer}>
-              <TextView label={"Açıklama:"} textStyle={text} />
-              <Input
-                onUpdateValue={updateInput.bind(this, "description")}
-                value={description}
-                label={"Açıklama giriniz"}
-                hasError={hasDescriptionError}
-              />
+        {
+          selectedButton === "Gelir" ? (
+            //INCOME BUTTON
+
+            <View style={card}>
+
+              {/* Description */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Username"} />
+                <View style={styles.inputContainer}>
+                  <TextView label={"Açıklama:"} textStyle={text} />
+                  <Input
+                    onUpdateValue={updateInput.bind(this, "description")}
+                    value={description}
+                    label={"Açıklama giriniz"}
+                    hasError={hasDescriptionError}
+                  />
+                </View>
+              </View>
+
+
+              {/* Amount */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Username"} />
+                <View style={[styles.inputContainer]}>
+                  <TextView label={"Miktar:"} textStyle={text} />
+                  <Input
+                    onUpdateValue={updateInput.bind(this, "amount")}
+                    value={amount}
+                    label={"0.00$"}
+                    hasError={hasAmountError}
+                    keyboardType={"numeric"}
+                  />
+                </View>
+              </View>
+
+
+              {/* Date */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Date"} />
+
+                <View style={styles.dateContainer}>
+                  <TextView label={"Tarih:"} textStyle={text} />
+                  <Pressable onPress={showDatePicker} style={styles.dateInput}>
+                    <TextView label={selectedDate || "Tarih Seçininiz"} textStyle={text} />
+                  </Pressable>
+
+                  <DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleConfirm}
+                    onCancel={hideDatePicker}
+                  />
+                </View>
+              </View>
+
+
+              {/* Bank */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Bank"} />
+
+                <View style={styles.categoryCon}>
+                  <TextView label={"Banka"} textStyle={text} />
+                  <View>
+                    <CustomFlatlist
+                      data={banks}
+                      selectedValue={selectedBank}
+                      onValueChange={setSelectedBank}
+                      width={280}
+                    />
+                  </View>
+                </View>
+              </View>
+
+
+              {/* Add Buttons */}
+              <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
+                <LinearGradient
+                  colors={['#56ab2f', '#a8e063']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.addButtonHandle}
+                >
+                  <TouchableOpacity
+                    style={styles.touchable}
+                    onPress={addButtonHandle}
+                  >
+                    <Text style={styles.selectedBtnText}>{"Gelir Ekle"}</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              </View>
+
             </View>
-          </View>
+
+          ) : (
+            //OUTCOME BUTTON
+
+            <View style={card}>
+
+              {/* Description */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Username"} />
+                <View style={styles.inputContainer}>
+                  <TextView label={"Açıklama:"} textStyle={text} />
+                  <Input
+                    onUpdateValue={updateInput.bind(this, "description")}
+                    value={description}
+                    label={"Açıklama giriniz"}
+                    hasError={hasDescriptionError}
+                  />
+                </View>
+              </View>
 
 
-          {/* Amount */}
-          <View style={styles.inputCard}>
-            <CustomIcons icon={"Username"} />
-            <View style={[styles.inputContainer]}>
-              <TextView label={"Miktar:"} textStyle={text} />
-              <Input
-                onUpdateValue={updateInput.bind(this, "amount")}
-                value={amount}
-                label={"0.00$"}
-                hasError={hasAmountError}
-              />
+              {/* Amount */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Username"} />
+                <View style={[styles.inputContainer]}>
+                  <TextView label={"Miktar:"} textStyle={text} />
+                  <Input
+                    onUpdateValue={updateInput.bind(this, "amount")}
+                    value={amount}
+                    label={"0.00$"}
+                    hasError={hasAmountError}
+                    keyboardType={"numeric"}
+                  />
+                </View>
+              </View>
+
+
+              {/* Date */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Date"} />
+
+                <View style={styles.dateContainer}>
+                  <TextView label={"Tarih:"} textStyle={text} />
+                  <Pressable onPress={showDatePicker} style={styles.dateInput}>
+                    <TextView label={selectedDate || "Tarih Seçininiz"} textStyle={text} />
+                  </Pressable>
+
+                  <DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleConfirm}
+                    onCancel={hideDatePicker}
+                  />
+                </View>
+              </View>
+
+
+              {/* Bank */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Bank"} />
+
+                <View style={styles.categoryCon}>
+                  <TextView label={"Banka"} textStyle={text} />
+                  <View>
+                    <CustomFlatlist
+                      data={banks}
+                      selectedValue={selectedBank}
+                      onValueChange={setSelectedBank}
+                      width={280}
+                    />
+                  </View>
+                </View>
+              </View>
+
+
+              {/* Outcome Category */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Category"} />
+
+                <View style={styles.categoryCon}>
+                  <TextView label={"Kategori"} textStyle={text} />
+                  <View>
+                    <CustomFlatlist
+                      data={categories}
+                      selectedValue={selectedCategory}
+                      onValueChange={setSelectedCategory}
+                      width={280}
+                    />
+                  </View>
+                </View>
+              </View>
+
+
+              {/* Add Buttons */}
+              <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
+                <LinearGradient
+                  colors={['#e74c3c', '#f1948a']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.addButtonHandle}
+                >
+                  <TouchableOpacity
+                    style={styles.touchable}
+                    onPress={addButtonHandle}
+                  >
+                    <Text style={styles.selectedBtnText}>{"Gider Ekle"}</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              </View>
+
             </View>
+          )
+        }
+
+
+        {/* Account Transactions */}
+        <View style={styles.bottomCard}>
+          <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
+
+          <View style={card}>
+            <FlatList
+              data={years}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.option}
+                  onPress={() => handleSelect(item)}
+                >
+                  <Text>{item.value}</Text>
+                </TouchableOpacity>
+              )}
+            />
           </View>
-
-
-          {/* Birth Date */}
-          <View style={styles.inputCard}>
-            <CustomIcons icon={"Date"} />
-
-            <View>
-              <TextView label={"Doğum Tarihi:"} textStyle={text} />
-              <Pressable onPress={"showDatePicker"} style={styles.dateInput}>
-                <Text style={text}>{"inputBirthDate" || "Doğum Tarihini Seçin"}</Text>
-              </Pressable>
-
-              {/* <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                onConfirm={handleConfirm}
-                onCancel={hideDatePicker}
-              /> */}
-            </View>
-          </View>
-
-
         </View>
+
 
       </CustomContainer>
 
@@ -214,13 +454,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginBottom: 15
   },
-  btn: {
-    borderRadius: 15,
-    width: 175,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   btnText: {
     color: "#999999",
     fontSize: 18,
@@ -245,5 +478,38 @@ const styles = StyleSheet.create({
   inputCard: {
     flexDirection: "row",
     marginBottom: 20
+  },
+  dateContainer: {
+    width: "280",
+  },
+  dateInput: {
+    backgroundColor: '#dee2e6', // beyaz arka plan
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc", // ince gri kenarlık
+    marginTop: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dateInputText: {
+    fontSize: 16,
+  },
+  addButtonHandle: {
+    borderRadius: 15,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  categoryCon: {
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  bottomCard: {
+    width: "100%",
+    height: "auto",
+    marginTop: 10
   }
 })
