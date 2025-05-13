@@ -6,6 +6,7 @@ import TextView from '../component/TextView'
 import { themes } from '../theme/Themes'
 import CustomIcons from '../component/CustomIcons'
 import CustomFlatList from '../component/CustomFlatlist'
+import CustomBarChart from '../component/Graph/CustomBarChart'
 
 const HomeScreen = ({ navigation }) => {
 
@@ -111,8 +112,17 @@ const HomeScreen = ({ navigation }) => {
 
           {/* Graph */}
           <View style={styles.graphCon}>
-
+            <View style={{ flex: 1 }}>
+              <CustomBarChart
+                data={[20, 30, 40, 10, 25, 50, 70, 65, 45, 30, 15, 10]}
+                labels={[
+                  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+                ]}
+              />
+            </View>
           </View>
+
 
         </View>
 
