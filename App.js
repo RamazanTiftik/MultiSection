@@ -67,7 +67,7 @@ function MainTabs() {
         options={{
           tabBarIcon: ({ focused }) => (
             <LinearGradient
-              colors={['#00c6ff', '#0072ff']}
+              colors={['#00c6ff', '#007AFF']}
               style={styles.postButton}
             >
               <Ionicons name="add" size={32} color="#fff" />

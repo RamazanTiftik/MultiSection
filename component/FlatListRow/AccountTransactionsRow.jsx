@@ -12,7 +12,14 @@ const AccountTransactionsRow = ({ title, date, amount, type }) => {
     return (
         <View style={styles.rowContainer}>
             <View style={styles.leftSide}>
-                <CustomIcons icon={"Income"} />
+                {
+                    type === "Gelir" ? (
+                        <CustomIcons icon={"Income"} />
+                    ) : (
+                        <CustomIcons icon={"Outcome"} />
+                    )
+                }
+
                 <View>
                     <TextView label={"Maaş"} textStyle={text} />
                     <TextView label={"01.03.20025"} textStyle={text} />

@@ -7,11 +7,27 @@ import { themes } from '../theme/Themes'
 import CustomIcons from '../component/CustomIcons'
 import CustomFlatList from '../component/CustomFlatlist'
 import CustomBarChart from '../component/Graph/CustomBarChart'
+import AccountTransactionsRow from '../component/FlatListRow/AccountTransactionsRow'
 
 const HomeScreen = ({ navigation }) => {
 
   //button
   const [selectedButton, setSelectedButton] = useState("Gelir")
+
+  const data = [
+    { label: 'Ocak', value: 50 },
+    { label: 'Şubat', value: 70 },
+    { label: 'Mart', value: 90 },
+    { label: 'Nisan', value: 60 },
+    { label: 'Mayıs', value: 40 },
+    { label: 'Haziran', value: 100 },
+    { label: 'Temmuz', value: 30 },
+    { label: 'Ağustos', value: 20 },
+    { label: 'Eylül', value: 80 },
+    { label: 'Ekim', value: 45 },
+    { label: 'Kasım', value: 55 },
+    { label: 'Aralık', value: 75 },
+  ];
 
   //theme
   const secondaryColor = themes.colorTheme.secondary.color
@@ -29,6 +45,8 @@ const HomeScreen = ({ navigation }) => {
   //local states
   const [selectedYear, setSelectedYear] = useState(years[2])
 
+  //selectedColumn state from component
+  const [selectedItem, setSelectedItem] = useState({})
 
 
   //top bar buttons
@@ -105,26 +123,49 @@ const HomeScreen = ({ navigation }) => {
 
 
           {/* Date */}
-          <View style>
-            <TextView label={"Nisan 2025"} textStyle={styles.dateText} />
-          </View>
+          {!!selectedItem.label && (
+            <View>
+              <TextView label={`${selectedItem.label} 2025`} textStyle={styles.dateText} />
+            </View>
+          )}
 
 
           {/* Graph */}
           <View style={styles.graphCon}>
             <View style={{ flex: 1 }}>
               <CustomBarChart
-                data={[20, 30, 40, 10, 25, 50, 70, 65, 45, 30, 15, 10]}
-                labels={[
-                  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-                  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
-                ]}
+                data={data}
+                onPressAction={(selected) => {
+                  setSelectedItem(selected)
+                }}
+                type={selectedButton}
               />
             </View>
           </View>
 
-
         </View>
+
+
+        {/* Account Transactions */}
+        {!!selectedItem.label && (
+          <View style={styles.bottomCard}>
+            <View style={{ marginBottom: 10 }}>
+              <TextView label={`${selectedItem.label} 2025 Hareketleri`} textStyle={titleTxt} />
+            </View>
+
+            {years.map(item => (
+              <View key={item.id} style={card}>
+                <AccountTransactionsRow
+                  title={[]}
+                  amount={30}
+                  date={selectedItem.label}
+                  type={selectedButton}
+                />
+              </View>
+            ))}
+
+          </View>
+        )}
 
 
       </CustomContainer>
@@ -164,7 +205,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   amountMounthly: {
-    color: "blue",
+    color: "#007AFF",
     fontSize: 22,
     fontWeight: "600"
   },
@@ -176,6 +217,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 250,
     backgroundColor: "gray",
+    marginTop: 10
+  },
+  bottomCard: {
+    width: "100%",
+    height: "auto",
     marginTop: 10
   }
 })

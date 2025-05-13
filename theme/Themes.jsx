@@ -22,7 +22,7 @@ const textTheme = {
     profileText: {
         fontSize: 18,
         fontWeight: "500",
-        color: "blue"
+        color: "#007AFF"
     }
 
 }
@@ -31,10 +31,10 @@ const textTheme = {
 const colorTheme = {
     //backgrounds
     primary: {
-        color: "#D4F6FF"
+        color: "#5c9ead"
     },
     secondary: {
-        color: "#C6E7FF"
+        color: "#e5e5e5"
     },
     tertiary: {
         color: "#FBFBFB"

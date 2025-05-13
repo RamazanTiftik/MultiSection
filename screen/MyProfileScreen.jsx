@@ -164,7 +164,7 @@ const MyProfileScreen = ({ navigation }) => {
           <TextView label={"Şifre Değiştirme"} textStyle={text} isBold />
 
           <View style={styles.bottomContainerItem}>
-            <CustomIcons icon={"Department"} />
+            <CustomIcons icon={"Password"} />
             <View style={{ flexDirection: "column" }}>
               <TextView label={"Eski Şifre:"} isBold={true} textStyle={text} />
               <Input
@@ -178,7 +178,7 @@ const MyProfileScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.bottomContainerItem}>
-            <CustomIcons icon={"Department"} />
+            <CustomIcons icon={"Password"} />
             <View style={{ flexDirection: "column" }}>
               <TextView label={"Yeni Şifre:"} isBold={true} textStyle={text} />
               <Input
@@ -192,7 +192,7 @@ const MyProfileScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.bottomContainerItem}>
-            <CustomIcons icon={"Department"} />
+            <CustomIcons icon={"Password"} />
             <View style={{ flexDirection: "column" }}>
               <TextView label={"Yeni Şifre (Tekrar)"} isBold={true} textStyle={text} />
               <Input

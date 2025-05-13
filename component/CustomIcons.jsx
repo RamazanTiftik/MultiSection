@@ -17,7 +17,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 const CustomIcons = ({ icon }) => {
 
     //themes - color
-    const secondaryColor = themes.colorTheme.secondary.color
+    const secondaryColor = themes.colorTheme.primary.color
 
     //icon size
     const titleIconSize = 20
@@ -76,11 +76,11 @@ const CustomIcons = ({ icon }) => {
                     <FontAwesome5 name="money-bill-wave" size={titleIconSize} color={secondaryColor} />
                 ) : icon === "Income" ? (
                     <View style={styles.income}>
-                        <AntDesign name="arrowup" size={titleIconSize} color="white" />
+                        <AntDesign name="arrowup" size={30} color="white" />
                     </View>
                 ) : icon === "Outcome" ? (
                     <View style={styles.outcome}>
-                        <AntDesign name="arrowdown" size={titleIconSize} color="white" />
+                        <AntDesign name="arrowdown" size={30} color="white" />
                     </View>
                 ) : null
             }
@@ -110,11 +110,15 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start"
     },
     income: {
-        backgroundColor: "green",
+        backgroundColor: "#38b000",
         padding: 5,
-        borderRadius: 55
+        borderRadius: 55,
+        marginRight: 10
     },
     outcome: {
-        backgroundColor: "red"
+        backgroundColor: "#d00000",
+        padding: 5,
+        borderRadius: 55,
+        marginRight: 10
     }
 })
