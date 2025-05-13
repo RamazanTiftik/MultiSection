@@ -45,12 +45,16 @@ const PostDataScreen = ({ navigation }) => {
     { id: 1, value: "Market" }, { id: 2, value: "Giysi" }, { id: 3, value: "Kozmetik" },
     { id: 4, value: "Eğlence" }, { id: 5, value: "Ev Kirası" }, { id: 6, value: "Diğer" }
   ]
+  const yesOrNo = [
+    { id: 1, value: "No" }, { id: 2, value: "Yes" }
+  ]
 
   //datas local state
   const [selectedMonth, setSelectedMonth] = useState(months[0])
   const [selectedYear, setSelectedYear] = useState(years[2])
   const [selectedBank, setSelectedBank] = useState(banks[0])
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
+  const [selectedChoose, setSelectedChoose] = useState(yesOrNo[0])
 
   //input states
   const [description, setDescription] = useState("")
@@ -270,6 +274,24 @@ const PostDataScreen = ({ navigation }) => {
               </View>
 
 
+              {/* Monthly Choose */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Task"} />
+
+                <View style={styles.categoryCon}>
+                  <TextView label={"Düzenli (Aylık) Gelir Mi?"} textStyle={text} />
+                  <View>
+                    <CustomFlatlist
+                      data={yesOrNo}
+                      selectedValue={selectedChoose}
+                      onValueChange={setSelectedChoose}
+                      width={280}
+                    />
+                  </View>
+                </View>
+              </View>
+
+
               {/* Add Buttons */}
               <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
                 <LinearGradient
@@ -374,6 +396,24 @@ const PostDataScreen = ({ navigation }) => {
                       data={categories}
                       selectedValue={selectedCategory}
                       onValueChange={setSelectedCategory}
+                      width={280}
+                    />
+                  </View>
+                </View>
+              </View>
+
+
+              {/* Monthly Choose */}
+              <View style={styles.inputCard}>
+                <CustomIcons icon={"Task"} />
+
+                <View style={styles.categoryCon}>
+                  <TextView label={"Düzenli (Aylık) Gider Mi?"} textStyle={text} />
+                  <View>
+                    <CustomFlatlist
+                      data={yesOrNo}
+                      selectedValue={selectedChoose}
+                      onValueChange={setSelectedChoose}
                       width={280}
                     />
                   </View>

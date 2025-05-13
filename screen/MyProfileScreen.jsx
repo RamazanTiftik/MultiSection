@@ -7,6 +7,7 @@ import CustomIcons from '../component/CustomIcons'
 import TextView from '../component/TextView'
 import Input from '../component/Input'
 
+
 const MyProfileScreen = ({ navigation }) => {
 
   //theme
@@ -41,6 +42,24 @@ const MyProfileScreen = ({ navigation }) => {
   const noteClickHandle = () => {
     console.log("bas")
   }
+
+  //monthly info button handle
+  const monthlyClickHandle = () => {
+
+  }
+
+  //notificaiton button handle
+  const notificationClickHandle = () => {
+
+  }
+
+  //feedback button handle
+  const feedbackClickHandle = () => {
+    navigation.navigate('ProfileStack', {
+      screen: 'FeedBack',
+    });
+  }
+
 
   //save button handle
   const saveButtonHandle = () => {
@@ -125,7 +144,7 @@ const MyProfileScreen = ({ navigation }) => {
 
           {/* Monthly Info Change */}
           <TouchableOpacity
-            onPress={noteClickHandle}
+            onPress={monthlyClickHandle}
             style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
           >
             <TextView label={"Aylık Bilgilerini Düzenle"} textStyle={text} />
@@ -141,7 +160,7 @@ const MyProfileScreen = ({ navigation }) => {
 
           {/* Notifications */}
           <TouchableOpacity
-            onPress={noteClickHandle}
+            onPress={notificationClickHandle}
             style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
           >
             <TextView label={"Bildirim Ayarları"} textStyle={text} />
@@ -149,7 +168,7 @@ const MyProfileScreen = ({ navigation }) => {
 
           {/* Feedback */}
           <TouchableOpacity
-            onPress={noteClickHandle}
+            onPress={feedbackClickHandle}
             style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
           >
             <TextView label={"Sorun Bildir"} textStyle={text} />
@@ -163,6 +182,7 @@ const MyProfileScreen = ({ navigation }) => {
 
           <TextView label={"Şifre Değiştirme"} textStyle={text} isBold />
 
+          {/* Old Password */}
           <View style={styles.bottomContainerItem}>
             <CustomIcons icon={"Password"} />
             <View style={{ flexDirection: "column" }}>
@@ -177,6 +197,7 @@ const MyProfileScreen = ({ navigation }) => {
             </View>
           </View>
 
+          {/* New Password */}
           <View style={styles.bottomContainerItem}>
             <CustomIcons icon={"Password"} />
             <View style={{ flexDirection: "column" }}>
@@ -191,6 +212,7 @@ const MyProfileScreen = ({ navigation }) => {
             </View>
           </View>
 
+          {/* Confirm Password */}
           <View style={styles.bottomContainerItem}>
             <CustomIcons icon={"Password"} />
             <View style={{ flexDirection: "column" }}>
@@ -285,10 +307,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
-    alignItems: "center"
+    alignItems: "center",
   },
   buttonCon: {
     width: "100%",
-    paddingHorizontal: 15
+    paddingHorizontal: 15,
+    
   }
 })

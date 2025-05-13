@@ -61,7 +61,9 @@ const CustomIcons = ({ icon }) => {
                 ) : icon === "Duration" ? (
                     <AntDesign name="pushpin" size={titleIconSize} color={secondaryColor} style={{ marginRight: 2 }} />
                 ) : icon === "Back" ? (
-                    <MaterialIcons name="arrow-back-ios-new" size={backButtonSize} color={secondaryColor} style={{ marginLeft: 10, marginRight: 3 }} />
+                    <View style={{ marginLeft: -15 }}>
+                        <MaterialIcons name="arrow-back-ios-new" size={backButtonSize} color={secondaryColor} style={{ marginLeft: 10, marginRight: 3 }} />
+                    </View>
                 ) : icon === "Required" ? (
                     <TextView label={"*"} textStyle={styles.required} />
                 ) : icon === "Clock" ? (

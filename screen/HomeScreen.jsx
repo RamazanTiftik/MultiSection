@@ -58,6 +58,10 @@ const HomeScreen = ({ navigation }) => {
     setSelectedButton("Gider")
   }
 
+  const summaryButtonHandle = () => {
+    setSelectedButton("Özet")
+  }
+
 
   //VIEW
   return (
@@ -94,6 +98,21 @@ const HomeScreen = ({ navigation }) => {
               onPress={outcomeButtonHandle}
             >
               <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+          {/* Summary Butonu */}
+          <LinearGradient
+            colors={selectedButton === "Özet" ? ['#e74c3c', '#f1948a'] : [tertiaryColor, tertiaryColor]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientBtn}
+          >
+            <TouchableOpacity
+              style={styles.touchable}
+              onPress={summaryButtonHandle}
+            >
+              <Text style={selectedButton === "Özet" ? styles.selectedBtnText : styles.btnText}>{"Özet"}</Text>
             </TouchableOpacity>
           </LinearGradient>
 
@@ -190,7 +209,7 @@ const styles = StyleSheet.create({
   },
   gradientBtn: {
     borderRadius: 15,
-    width: 175,
+    width: 115,
     height: 40,
   },
   touchable: {
@@ -223,5 +242,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "auto",
     marginTop: 10
-  }
+  },
+  selectedBtnText: {
+    fontWeight: 600,
+    fontSize: 18,
+    color: "#000000"
+  },
+  btnText: {
+    color: "#999999",
+    fontSize: 18,
+    fontWeight: 600
+  },
 })
