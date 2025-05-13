@@ -72,9 +72,19 @@ const CustomIcons = ({ icon }) => {
                     <MaterialCommunityIcons name="clock-alert" size={23} color={secondaryColor} style={{ marginRight: 2 }} />
                 ) : icon === "Bank" ? (
                     <FontAwesome name="bank" size={titleIconSize} color={secondaryColor} />
+                ) : icon === "Amount" ? (
+                    <FontAwesome5 name="money-bill-wave" size={titleIconSize} color={secondaryColor} />
+                ) : icon === "Income" ? (
+                    <View style={styles.income}>
+                        <AntDesign name="arrowup" size={titleIconSize} color="white" />
+                    </View>
+                ) : icon === "Outcome" ? (
+                    <View style={styles.outcome}>
+                        <AntDesign name="arrowdown" size={titleIconSize} color="white" />
+                    </View>
                 ) : null
             }
-        </View>
+        </View >
     )
 }
 
@@ -98,5 +108,13 @@ const styles = StyleSheet.create({
         color: "red",
         alignItems: "flex-start",
         justifyContent: "flex-start"
+    },
+    income: {
+        backgroundColor: "green",
+        padding: 5,
+        borderRadius: 55
+    },
+    outcome: {
+        backgroundColor: "red"
     }
 })

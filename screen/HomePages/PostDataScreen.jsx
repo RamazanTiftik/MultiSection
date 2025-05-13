@@ -218,9 +218,9 @@ const PostDataScreen = ({ navigation }) => {
 
               {/* Amount */}
               <View style={styles.inputCard}>
-                <CustomIcons icon={"Description"} />
+                <CustomIcons icon={"Amount"} />
                 <View style={[styles.inputContainer]}>
-                  <TextView label={"Miktar:"} textStyle={text} />
+                  <TextView label={"Miktar:"} textStyle={[text, { marginLeft: 3 }]} />
                   <Input
                     onUpdateValue={updateInput.bind(this, "amount")}
                     value={amount}
@@ -311,9 +311,9 @@ const PostDataScreen = ({ navigation }) => {
 
               {/* Amount */}
               <View style={styles.inputCard}>
-                <CustomIcons icon={"Description"} />
+                <CustomIcons icon={"Amount"} />
                 <View style={[styles.inputContainer]}>
-                  <TextView label={"Miktar:"} textStyle={text} />
+                  <TextView label={"Miktar:"} textStyle={[text, { marginLeft: 3 }]} />
                   <Input
                     onUpdateValue={updateInput.bind(this, "amount")}
                     value={amount}
@@ -409,20 +409,18 @@ const PostDataScreen = ({ navigation }) => {
             <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
           </View>
 
-          <FlatList
-            data={years}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={card}>
-                <AccountTransactionsRow
-                  title={[]}
-                  amount={amount}
-                  date={selectedDate}
-                  type={selectedButton}
-                />
-              </View>
-            )}
-          />
+          {years.map(item => (
+            <View key={item.id} style={card}>
+              <AccountTransactionsRow
+                title={[]}
+                amount={amount}
+                date={selectedDate}
+                type={selectedButton}
+              />
+            </View>
+          ))}
+
+
         </View>
 
 
