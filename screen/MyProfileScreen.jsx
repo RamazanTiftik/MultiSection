@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { themes } from '../theme/Themes'
 import CustomContainer from '../component/CustomContainer'
 import CustomIcons from '../component/CustomIcons'
 import TextView from '../component/TextView'
 import Input from '../component/Input'
+import * as SystemUI from 'expo-system-ui'
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -36,6 +37,14 @@ const MyProfileScreen = ({ navigation }) => {
     setConfirmPassword("")
     setNewPassword("")
   }, [])
+
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      // aşağıdaki kod navigation bar'ı gizler
+      SystemUI.setNavigationBarVisibilityAsync('hidden');
+    }
+  }, []);
 
 
   //note button handle
@@ -104,7 +113,7 @@ const MyProfileScreen = ({ navigation }) => {
       <CustomContainer>
 
         {/* Profile Main Card */}
-        <View style={[card, { alignItems: "center", marginTop: 15 }]}>
+        <View style={[card, { alignItems: "center" }]}>
 
           {/* Icon */}
           <View style={styles.iconCon}>
@@ -312,6 +321,6 @@ const styles = StyleSheet.create({
   buttonCon: {
     width: "100%",
     paddingHorizontal: 15,
-    
+
   }
 })

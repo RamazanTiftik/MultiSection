@@ -198,7 +198,6 @@ const PostDataScreen = ({ navigation }) => {
 
 
         {/* Main Card */}
-
         {
           selectedButton === "Gelir" ? (
             //INCOME BUTTON
@@ -476,13 +475,12 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
-    zIndex: 1000,
     width: "100%",
     height: 75,
     paddingTop: 15,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25
+    borderBottomRightRadius: 25,
   },
   upBar: {
     backgroundColor: "#f3f3f3",

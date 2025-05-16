@@ -17,7 +17,7 @@ const CustomContainer = ({ children }) => {
     //themes
     const conPaddingHorizontal = themes.staticCss.container.paddingHorizontal
     const secondaryColor = themes.colorTheme.secondary.color
-    
+
 
     return (
         <KeyboardAvoidingView
@@ -26,8 +26,11 @@ const CustomContainer = ({ children }) => {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 110 }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
                     keyboardShouldPersistTaps="handled"
+                    bounces={false}
+                    contentInsetAdjustmentBehavior="never"
+                    overScrollMode="never" // Android için
                 >
                     <SafeAreaView style={[styles.container, { paddingHorizontal: conPaddingHorizontal, backgroundColor: secondaryColor }]}>
                         {children}
