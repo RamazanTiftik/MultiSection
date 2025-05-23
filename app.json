@@ -12,6 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "androidNavigationBar": {
+      "visible": "leanback"
+    },
     "ios": {
       "supportsTablet": true
     },

@@ -21,8 +21,20 @@ const AccountTransactionsRow = ({ title, date, amount, type }) => {
                 }
 
                 <View>
-                    <TextView label={"Maaş"} textStyle={text} />
-                    <TextView label={"01.03.20025"} textStyle={text} />
+                    {
+                        type === "Gelir" ? (
+                            <View>
+                                <TextView label={"Maaş"} textStyle={text} />
+                                <TextView label={"01.03.20025"} textStyle={text} />
+                            </View>
+                        ) : (
+                            <View>
+                                <TextView label={"Spotify"} textStyle={text} />
+                                <TextView label={"01.03.20025"} textStyle={text} />
+                            </View>
+                        )
+                    }
+
                 </View>
             </View>
             <View style={styles.rightSide}>

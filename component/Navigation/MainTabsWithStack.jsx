@@ -8,9 +8,14 @@ import HomeScreen from '../../screen/HomeScreen'
 import PostDataScreen from '../../screen/HomePages/PostDataScreen';
 import MyProfileScreen from '../../screen/MyProfileScreen';
 import FeedBackScreen from '../../screen/DetailPages/ProfileDetailPages/FeedBackScreen';
+import MonthlyInfoScreen from '../../screen/DetailPages/ProfileDetailPages/MonthlyInfoScreen';
+import UserNoteScreen from '../../screen/DetailPages/ProfileDetailPages/UserNoteScreen';
+import NotificationScreen from '../../screen/DetailPages/ProfileDetailPages/NotificationScreen';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
 
 // Profile Stack
 function ProfileStack() {
@@ -18,6 +23,9 @@ function ProfileStack() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="MyProfile" component={MyProfileScreen} />
             <Stack.Screen name="FeedBack" component={FeedBackScreen} />
+            <Stack.Screen name="Notification" component={NotificationScreen} />
+            <Stack.Screen name="User Note" component={UserNoteScreen} />
+            <Stack.Screen name="Mouthly Info" component={MonthlyInfoScreen} />
         </Stack.Navigator>
     );
 }

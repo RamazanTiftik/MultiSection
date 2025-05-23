@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import CustomContainer from '../../component/CustomContainer'
 import CustomFlatlist from '../../component/CustomFlatlist'
@@ -67,6 +67,9 @@ const PostDataScreen = ({ navigation }) => {
   //date time picker 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
+
+  //get phone theme (light & dark)
+  const theme = useColorScheme();
 
 
   //top bar buttons
@@ -250,6 +253,9 @@ const PostDataScreen = ({ navigation }) => {
                     mode="date"
                     onConfirm={handleConfirm}
                     onCancel={hideDatePicker}
+                    textColor={theme === 'dark' ? '#fff' : '#000'}
+                    themeVariant="light"
+                    display="spinner"
                   />
                 </View>
               </View>
@@ -361,6 +367,8 @@ const PostDataScreen = ({ navigation }) => {
                     mode="date"
                     onConfirm={handleConfirm}
                     onCancel={hideDatePicker}
+                    textColor="#000"
+                    themeVariant="light"
                   />
                 </View>
               </View>

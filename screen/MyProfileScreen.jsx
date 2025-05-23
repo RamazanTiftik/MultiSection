@@ -6,7 +6,8 @@ import CustomContainer from '../component/CustomContainer'
 import CustomIcons from '../component/CustomIcons'
 import TextView from '../component/TextView'
 import Input from '../component/Input'
-import * as SystemUI from 'expo-system-ui'
+import * as NavigationBar from 'expo-navigation-bar';
+import { useFocusEffect } from '@react-navigation/native'
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -39,27 +40,25 @@ const MyProfileScreen = ({ navigation }) => {
   }, [])
 
 
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      // aşağıdaki kod navigation bar'ı gizler
-      SystemUI.setNavigationBarVisibilityAsync('hidden');
-    }
-  }, []);
-
-
   //note button handle
   const noteClickHandle = () => {
-    console.log("bas")
+    navigation.navigate('ProfileStack', {
+      screen: 'User Note',
+    });
   }
 
   //monthly info button handle
   const monthlyClickHandle = () => {
-
+    navigation.navigate('ProfileStack', {
+      screen: 'Mouthly Info',
+    });
   }
 
   //notificaiton button handle
   const notificationClickHandle = () => {
-
+    navigation.navigate('ProfileStack', {
+      screen: 'Notification',
+    });
   }
 
   //feedback button handle
@@ -113,7 +112,7 @@ const MyProfileScreen = ({ navigation }) => {
       <CustomContainer>
 
         {/* Profile Main Card */}
-        <View style={[card, { alignItems: "center" }]}>
+        <View style={[card, { alignItems: "center", marginTop: 15 }]}>
 
           {/* Icon */}
           <View style={styles.iconCon}>
@@ -156,7 +155,7 @@ const MyProfileScreen = ({ navigation }) => {
             onPress={monthlyClickHandle}
             style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
           >
-            <TextView label={"Aylık Bilgilerini Düzenle"} textStyle={text} />
+            <TextView label={"Aylık Bilgilerimi Düzenle"} textStyle={text} />
           </TouchableOpacity>
 
           {/* User Note */}
@@ -164,7 +163,7 @@ const MyProfileScreen = ({ navigation }) => {
             onPress={noteClickHandle}
             style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
           >
-            <TextView label={"Harcama Notu"} textStyle={text} />
+            <TextView label={"Kişisel Notlarım"} textStyle={text} />
           </TouchableOpacity>
 
           {/* Notifications */}
