@@ -17,7 +17,7 @@ import MainTabsWithStack from './component/Navigation/MainTabsWithStack';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // giriş durumu
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // giriş durumu
 
   return (
     <NavigationContainer>

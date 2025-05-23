@@ -1,13 +1,13 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { Image, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { themes } from '../theme/Themes'
 import CustomContainer from '../component/CustomContainer'
 import CustomIcons from '../component/CustomIcons'
 import TextView from '../component/TextView'
 import Input from '../component/Input'
-import * as NavigationBar from 'expo-navigation-bar';
-import { useFocusEffect } from '@react-navigation/native'
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig/Firebase';
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -66,6 +66,30 @@ const MyProfileScreen = ({ navigation }) => {
     navigation.navigate('ProfileStack', {
       screen: 'FeedBack',
     });
+  }
+
+  //logout button handle
+  const logoutClickHandle = async () => {
+    try {
+      await signOut(auth);
+      console.log("Çıkış başarılı");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "SignIn" }]
+      });
+      return true;
+    } catch (error) {
+      console.log("Çıkış hatası:", error.message);
+    }
+  }
+
+  const logoutAlert = () => {
+    Alert.alert("Emin Misin!", "Çıkış yapmak istediğinizden emin misiniz ?",
+      [
+        { text: "Hayır", style: "cancel" },
+        { text: "Evet", onPress: () => logoutClickHandle() }
+      ]
+    )
   }
 
 
@@ -182,6 +206,7 @@ const MyProfileScreen = ({ navigation }) => {
             <TextView label={"Sorun Bildir"} textStyle={text} />
           </TouchableOpacity>
 
+
         </View>
 
 
@@ -255,6 +280,16 @@ const MyProfileScreen = ({ navigation }) => {
 
 
         </View>
+
+
+        {/* Logout */}
+        <TouchableOpacity
+          onPress={logoutAlert}
+          style={[card, { width: "100%", height: 60, justifyContent: "center", marginTop: 13 }]}
+        >
+          <TextView label={"Çıkış Yap"} textStyle={[text, { color: "red" }]} />
+        </TouchableOpacity>
+
 
 
       </CustomContainer>

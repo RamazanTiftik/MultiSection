@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { themes } from '../../theme/Themes'
 import CustomContainer from '../../component/CustomContainer'
@@ -6,6 +6,24 @@ import Input from '../../component/Input'
 import TextView from '../../component/TextView'
 import CustomIcons from '../../component/CustomIcons'
 import CustomButton from '../../component/CustomButton'
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { auth } from '../../firebaseConfig/Firebase';
+
+
+/* const firebaseConfig = {
+  apiKey: "AIzaSyBIsIgoXlK2DkJ7iPtINbTLpD75kgparX0",
+  authDomain: "walletapp-ce690.firebaseapp.com",
+  projectId: "walletapp-ce690",
+  storageBucket: "walletapp-ce690.appspot.com",
+  messagingSenderId: "342743455734",
+  appId: "1:342743455734:web:d8a18dbacb5526dd6d59d7",
+  measurementId: "G-HVPW4N99PW"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app); */
+
 
 const SignInScreen = ({ navigation, onLogin }) => {
 
@@ -24,7 +42,7 @@ const SignInScreen = ({ navigation, onLogin }) => {
 
 
   //SignUp button handle
-  const signInBtnHandle = () => {
+  const signInBtnHandle = async () => {
 
     if (!email && !password) {
       if (!email) {
@@ -35,8 +53,15 @@ const SignInScreen = ({ navigation, onLogin }) => {
       }
 
     } else {
-      console.log(email)
-      onLogin()
+      //user login is successful
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        onLogin()
+
+      } catch (error) {
+        //user login is failed
+        Alert.alert('Hata', 'Giriş başarısız. Bilgilerinizi kontrol edin.');
+      }
     }
   }
 
