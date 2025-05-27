@@ -8,6 +8,8 @@ import TextView from '../component/TextView'
 import Input from '../component/Input'
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig/Firebase';
+import { useDispatch } from 'react-redux'
+import { logout } from '../redux/slices/AuthSlice'
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -29,6 +31,9 @@ const MyProfileScreen = ({ navigation }) => {
   const [hasOldPasswordError, setHasOldPasswordError] = useState(false);
   const [hasPasswordError, setHasPasswordError] = useState(false);
   const [hasConfirmPasswordError, setHasConfirmPasswordError] = useState(false);
+
+  //redux
+  const dispatch = useDispatch()
 
 
   useEffect(() => {
@@ -72,12 +77,8 @@ const MyProfileScreen = ({ navigation }) => {
   const logoutClickHandle = async () => {
     try {
       await signOut(auth);
-      console.log("Çıkış başarılı");
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "SignIn" }]
-      });
-      return true;
+      dispatch(logout())
+
     } catch (error) {
       console.log("Çıkış hatası:", error.message);
     }

@@ -9,20 +9,8 @@ import CustomButton from '../../component/CustomButton'
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
 import { auth } from '../../firebaseConfig/Firebase';
-
-
-/* const firebaseConfig = {
-  apiKey: "AIzaSyBIsIgoXlK2DkJ7iPtINbTLpD75kgparX0",
-  authDomain: "walletapp-ce690.firebaseapp.com",
-  projectId: "walletapp-ce690",
-  storageBucket: "walletapp-ce690.appspot.com",
-  messagingSenderId: "342743455734",
-  appId: "1:342743455734:web:d8a18dbacb5526dd6d59d7",
-  measurementId: "G-HVPW4N99PW"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); */
+import { useDispatch } from 'react-redux'
+import { login } from '../../redux/slices/AuthSlice'
 
 
 const SignInScreen = ({ navigation, onLogin }) => {
@@ -40,6 +28,9 @@ const SignInScreen = ({ navigation, onLogin }) => {
   const [hasEmailError, setHasEmailError] = useState(false);
   const [hasPasswordError, setHasPasswordError] = useState(false)
 
+  //redux
+  const dispatch = useDispatch()
+
 
   //SignUp button handle
   const signInBtnHandle = async () => {
@@ -56,8 +47,8 @@ const SignInScreen = ({ navigation, onLogin }) => {
       //user login is successful
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        onLogin()
-
+        dispatch(login())
+        
       } catch (error) {
         //user login is failed
         Alert.alert('Hata', 'Giriş başarısız. Bilgilerinizi kontrol edin.');
