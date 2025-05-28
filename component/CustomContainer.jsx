@@ -26,7 +26,7 @@ const CustomContainer = ({ children }) => {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 100, paddingTop: 10 }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 100, paddingTop: 10, backgroundColor: "#e5e5e5" }}
                     keyboardShouldPersistTaps="handled"
                     bounces={false}
                     contentInsetAdjustmentBehavior="never"

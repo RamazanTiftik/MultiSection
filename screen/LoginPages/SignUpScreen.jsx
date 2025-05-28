@@ -1,4 +1,4 @@
-import { BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, BackHandler, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import TextView from '../../component/TextView'
 import Input from '../../component/Input'
@@ -6,6 +6,13 @@ import CustomIcons from '../../component/CustomIcons'
 import { themes } from '../../theme/Themes'
 import CustomButton from '../../component/CustomButton'
 import CustomContainer from '../../component/CustomContainer'
+import { useDispatch } from 'react-redux'
+import { auth } from '../../firebaseConfig/Firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, collection, updateDoc, addDoc } from "firebase/firestore";
+import { db } from '../../firebaseConfig/Firebase';
+import CustomPopup from '../../component/CustomPopup'
+
 
 const SignUpScreen = ({ navigation }) => {
 
@@ -23,6 +30,11 @@ const SignUpScreen = ({ navigation }) => {
     const [hasEmailError, setHasEmailError] = useState(false);
     const [hasPasswordError, setHasPasswordError] = useState(false)
     const [hasConfirmPasswordError, setConfirmHasPasswordError] = useState(false)
+
+    //popup
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("")
+    const [type, setType] = useState("success")
 
 
     //Back Button Func
@@ -56,8 +68,64 @@ const SignUpScreen = ({ navigation }) => {
     }, [navigation]);
 
 
+    //add income collection for user
+    const addIncomeForUser = async () => {
+        try {
+            //get current user id
+            const userId = auth.currentUser.uid;
+
+            //users/{userId}/income -> collection reference
+            const incomeRef = collection(db, "users", userId, "income");
+
+            //add document to income collection
+            const docRef = await addDoc(incomeRef, {
+                bankName: "",
+                createdDate: new Date(),
+                amount: "",
+                id: ""  // Şimdilik boş, birazdan set edeceğiz
+            });
+
+            //set document id
+            await updateDoc(docRef, {
+                id: docRef.id
+            });
+
+        } catch (error) {
+            Alert.alert("Hata", "Kullanıcı kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.")
+        }
+    };
+
+    //add income collection for user
+    const addOutcomeForUser = async () => {
+        try {
+            //get current user id
+            const userId = auth.currentUser.uid;
+
+            //users/{userId}/outcome -> collection reference
+            const incomeRef = collection(db, "users", userId, "outcome");
+
+            //add document to outcome colection
+            const docRef = await addDoc(incomeRef, {
+                bankName: "",
+                createdDate: new Date(),
+                amount: "",
+                id: ""
+            });
+
+            //set document id
+            await updateDoc(docRef, {
+                id: docRef.id
+            });
+
+        } catch (error) {
+            Alert.alert("Hata", "Kullanıcı kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.")
+        }
+    };
+
+
     //SignUp button handle
-    const signUpBtnHandle = () => {
+    const signUpBtnHandle = async () => {
+        //inputs empty
         if (!email && !password && !confirmPassword) {
             if (!email) {
                 setHasEmailError(true)
@@ -67,12 +135,44 @@ const SignUpScreen = ({ navigation }) => {
             }
             if (!confirmPassword) {
                 setConfirmHasPasswordError(true)
-
             }
-        } else {
-            console.log(email)
-        }
 
+        } else {
+            //user sign up is successful
+            try {
+                //sign up -> authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+                const user = userCredential.user
+
+                //save user to firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    createdAt: new Date(),
+                });
+
+                //show popup message
+                setPopupMessage("Başarıyla kaydınız oluşturulmuştur.")
+                setPopupVisible(true)
+
+            } catch (error) {
+                //user sign up is failed
+                setPopupMessage('Kayıt olma işlemi başarısız. Bilgilerinizi kontrol edin.')
+                setType("error")
+                setPopupVisible(true)
+            }
+        }
+    }
+
+
+    //popup close handle
+    const popupCloseHandle = () => {
+        setPopupMessage("")
+        setPopupVisible(false)
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "SignIn" }]
+        })
     }
 
 
@@ -100,6 +200,10 @@ const SignUpScreen = ({ navigation }) => {
     //VIEW
     return (
         <CustomContainer>
+
+            <View>
+                <Image source={require('../../assets/walletLogo.jpg')} style={styles.logo} />
+            </View>
 
             <View style={styles.staticText}>
                 <TextView label={"Mail adresinizi ve şifrenizi girerek sisteme kayıt olabilirsiniz."} />
@@ -150,6 +254,10 @@ const SignUpScreen = ({ navigation }) => {
                 </View>
             </View>
 
+
+            {/* Custom Pop-up */}
+            <CustomPopup visible={popupVisible} message={popupMessage} onClose={popupCloseHandle} type={type} />
+
             {/* Sign Up Button */}
             <View style={styles.btn}>
                 <CustomButton btnTitle={"Kayıt Ol"} onPressAction={signUpBtnHandle} />
@@ -167,5 +275,12 @@ const styles = StyleSheet.create({
     },
     staticText: {
         marginBottom: 15
-    }
+    },
+    logo: {
+        width: 130,
+        height: 130,
+        borderRadius: 150,
+        marginBottom: 30,
+        marginTop: 30
+    },
 })

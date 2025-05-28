@@ -10,6 +10,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig/Firebase';
 import { useDispatch } from 'react-redux'
 import { logout } from '../redux/slices/AuthSlice'
+import CustomAlert from '../component/CustomAlert'
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -34,6 +35,9 @@ const MyProfileScreen = ({ navigation }) => {
 
   //redux
   const dispatch = useDispatch()
+
+  //alert visible state
+  const [showAlert, setShowAlert] = useState(false)
 
 
   useEffect(() => {
@@ -85,12 +89,7 @@ const MyProfileScreen = ({ navigation }) => {
   }
 
   const logoutAlert = () => {
-    Alert.alert("Emin Misin!", "Çıkış yapmak istediğinizden emin misiniz ?",
-      [
-        { text: "Hayır", style: "cancel" },
-        { text: "Evet", onPress: () => logoutClickHandle() }
-      ]
-    )
+    setShowAlert(true)
   }
 
 
@@ -279,9 +278,17 @@ const MyProfileScreen = ({ navigation }) => {
             </LinearGradient>
           </View>
 
-
         </View>
 
+        <CustomAlert
+          visible={showAlert}
+          message="Çıkış yapmak istediğinize emin misiniz?"
+          onConfirm={() => {
+            logoutClickHandle()
+            setShowAlert(false);
+          }}
+          onCancel={() => setShowAlert(false)}
+        />
 
         {/* Logout */}
         <TouchableOpacity

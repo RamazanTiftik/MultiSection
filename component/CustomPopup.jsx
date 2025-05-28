@@ -1,13 +1,18 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const CustomPopup = ({ visible, message, onClose }) => {
+const CustomPopup = ({ visible, message, onClose, type }) => {
+    const buttonColor = type === "error" ? "#F28B82" : "#5CB338"; // soft kırmızı vs yeşil
+
     return (
         <Modal transparent animationType="fade" visible={visible}>
             <View style={styles.modalBackground}>
                 <View style={styles.modalContainer}>
                     <Text style={styles.message}>{message}</Text>
-                    <TouchableOpacity style={styles.button} onPress={onClose}>
+                    <TouchableOpacity
+                        style={[styles.button, { backgroundColor: buttonColor }]}
+                        onPress={onClose}
+                    >
                         <Text style={styles.buttonText}>Tamam</Text>
                     </TouchableOpacity>
                 </View>
@@ -36,7 +41,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     button: {
-        backgroundColor: "#5CB338",
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,

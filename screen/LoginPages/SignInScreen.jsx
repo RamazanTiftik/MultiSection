@@ -34,7 +34,7 @@ const SignInScreen = ({ navigation, onLogin }) => {
 
   //SignUp button handle
   const signInBtnHandle = async () => {
-
+    //inputs empty
     if (!email && !password) {
       if (!email) {
         setHasEmailError(true)
@@ -48,7 +48,7 @@ const SignInScreen = ({ navigation, onLogin }) => {
       try {
         await signInWithEmailAndPassword(auth, email, password);
         dispatch(login())
-        
+
       } catch (error) {
         //user login is failed
         Alert.alert('Hata', 'Giriş başarısız. Bilgilerinizi kontrol edin.');
@@ -63,8 +63,7 @@ const SignInScreen = ({ navigation, onLogin }) => {
 
   //forgot password handle
   const forgotPasswordHandle = () => {
-    console.log("234")
-
+    navigation.navigate("Reset Password")
   }
 
 
@@ -163,16 +162,17 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 150,
     marginBottom: 30,
+    marginTop: 30
   },
   registerText: {
     fontSize: 16,
     fontWeight: "500",
     marginBottom: 30,
-    marginTop: 20,
-    color: "blue"
+    marginTop: 30,
+    color: "#007AFF"
   },
   forgotPasswordText: {
-    color: "blue",
+    color: "#007AFF",
     fontWeight: "500",
   }
 })
