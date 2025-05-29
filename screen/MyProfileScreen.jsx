@@ -8,9 +8,12 @@ import TextView from '../component/TextView'
 import Input from '../component/Input'
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig/Firebase';
+import { db } from '../firebaseConfig/Firebase';
 import { useDispatch } from 'react-redux'
 import { logout } from '../redux/slices/AuthSlice'
 import CustomAlert from '../component/CustomAlert'
+import { logoutFirebase } from '../service/AuthService'
+import { doc, getDoc } from "firebase/firestore";
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -33,20 +36,58 @@ const MyProfileScreen = ({ navigation }) => {
   const [hasPasswordError, setHasPasswordError] = useState(false);
   const [hasConfirmPasswordError, setHasConfirmPasswordError] = useState(false);
 
+  //user data state
+  const [userEmail, setUserEmail] = useState("")
+
   //redux
   const dispatch = useDispatch()
 
   //alert visible state
   const [showAlert, setShowAlert] = useState(false)
 
+  //loading state
+  const [loading, setLoading] = useState(false)
+
 
   useEffect(() => {
+    setLoading(true)
     //when screen is focused, clear inputs
     //dispatch ile kontrol edilebilr bu durum
     setOldPassword("")
     setConfirmPassword("")
     setNewPassword("")
+
+    //gel user data from firestore func
+    getUserData()
+    setLoading(false)
   }, [])
+
+
+  //get user data from firestore
+  async function getUserData() {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        return;
+      }
+
+      const docRef = doc(db, "users", user.uid); // UID ile dokümanı çek
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        //users data
+        const userData = docSnap.data();
+        setUserEmail(userData.email)
+        return userData;
+
+      } else {
+        //user not found
+      }
+    } catch (error) {
+      //handle any errors
+    }
+  }
+
 
 
   //note button handle
@@ -80,7 +121,7 @@ const MyProfileScreen = ({ navigation }) => {
   //logout button handle
   const logoutClickHandle = async () => {
     try {
-      await signOut(auth);
+      logoutFirebase()
       dispatch(logout())
 
     } catch (error) {
@@ -131,178 +172,184 @@ const MyProfileScreen = ({ navigation }) => {
 
 
   //VIEW
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
-      <CustomContainer>
+  if (loading) {
+    <View>
+      <Text>Yüklenioy</Text>
+    </View>
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
+        <CustomContainer>
 
-        {/* Profile Main Card */}
-        <View style={[card, { alignItems: "center", marginTop: 15 }]}>
+          {/* Profile Main Card */}
+          <View style={[card, { alignItems: "center", marginTop: 15 }]}>
 
-          {/* Icon */}
-          <View style={styles.iconCon}>
-            <CustomIcons icon={"Username"} />
-          </View>
+            {/* Icon */}
+            <View style={styles.iconCon}>
+              <CustomIcons icon={"Username"} />
+            </View>
 
-          {/* User Infos */}
-          <View style={styles.titleTxtCon}>
-            <TextView label={"Ramazan Tiftik"} textStyle={text} />
-            <TextView label={"ramazan.tiftik3@gmail.com"} textStyle={text} />
-          </View>
+            {/* User Infos */}
+            <View style={styles.titleTxtCon}>
+              <TextView label={"Ramazan Tiftik"} textStyle={text} />
+              <TextView label={userEmail} textStyle={text} />
+            </View>
 
-          {/* Amount Infos */}
-          <View style={styles.bottomCon}>
-            <TextView label={"Düzenli (Aylık)"} textStyle={text} />
-            <View style={styles.amountTxtCon}>
-              <View style={[styles.amountItem, { borderRightWidth: 2, borderRightColor: "#ddd" }]}>
-                <TextView label={"30000$"} textStyle={profileText} />
-                <TextView label={"Maaş"} textStyle={text} />
+            {/* Amount Infos */}
+            <View style={styles.bottomCon}>
+              <TextView label={"Düzenli (Aylık)"} textStyle={text} />
+              <View style={styles.amountTxtCon}>
+                <View style={[styles.amountItem, { borderRightWidth: 2, borderRightColor: "#ddd" }]}>
+                  <TextView label={"30000$"} textStyle={profileText} />
+                  <TextView label={"Maaş"} textStyle={text} />
+                </View>
+                <View style={styles.amountItem}>
+                  <TextView label={"10000$"} textStyle={profileText} />
+                  <TextView label={"Gider"} textStyle={text} />
+                </View>
+                <View style={[styles.amountItem, { borderLeftColor: "#ddd", borderLeftWidth: 2 }]}>
+                  <TextView label={"20000$"} textStyle={profileText} />
+                  <TextView label={"Tasarruf"} textStyle={text} />
+                </View>
               </View>
-              <View style={styles.amountItem}>
-                <TextView label={"10000$"} textStyle={profileText} />
-                <TextView label={"Gider"} textStyle={text} />
-              </View>
-              <View style={[styles.amountItem, { borderLeftColor: "#ddd", borderLeftWidth: 2 }]}>
-                <TextView label={"20000$"} textStyle={profileText} />
-                <TextView label={"Tasarruf"} textStyle={text} />
-              </View>
             </View>
-          </View>
 
-        </View>
-
-
-        {/* Bottom Card (Options) */}
-        <View style={styles.bottomCard}>
-
-          {/* Monthly Info Change */}
-          <TouchableOpacity
-            onPress={monthlyClickHandle}
-            style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
-          >
-            <TextView label={"Aylık Bilgilerimi Düzenle"} textStyle={text} />
-          </TouchableOpacity>
-
-          {/* User Note */}
-          <TouchableOpacity
-            onPress={noteClickHandle}
-            style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
-          >
-            <TextView label={"Kişisel Notlarım"} textStyle={text} />
-          </TouchableOpacity>
-
-          {/* Notifications */}
-          <TouchableOpacity
-            onPress={notificationClickHandle}
-            style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
-          >
-            <TextView label={"Bildirim Ayarları"} textStyle={text} />
-          </TouchableOpacity>
-
-          {/* Feedback */}
-          <TouchableOpacity
-            onPress={feedbackClickHandle}
-            style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
-          >
-            <TextView label={"Sorun Bildir"} textStyle={text} />
-          </TouchableOpacity>
-
-
-        </View>
-
-
-        {/* Change Password */}
-        <View style={[card, styles.bottomContainer, { borderColor: tertiaryColor }]}>
-
-          <TextView label={"Şifre Değiştirme"} textStyle={text} isBold />
-
-          {/* Old Password */}
-          <View style={styles.bottomContainerItem}>
-            <CustomIcons icon={"Password"} />
-            <View style={{ flexDirection: "column" }}>
-              <TextView label={"Eski Şifre:"} isBold={true} textStyle={text} />
-              <Input
-                label={"Eski Şifre"}
-                onUpdateValue={updateInput.bind(this, "oldPassword")}
-                value={oldPassword}
-                secure
-                hasError={hasOldPasswordError}
-              />
-            </View>
-          </View>
-
-          {/* New Password */}
-          <View style={styles.bottomContainerItem}>
-            <CustomIcons icon={"Password"} />
-            <View style={{ flexDirection: "column" }}>
-              <TextView label={"Yeni Şifre:"} isBold={true} textStyle={text} />
-              <Input
-                label={"Yeni Şifre"}
-                onUpdateValue={updateInput.bind(this, "newPassword")}
-                value={newPassword}
-                secure
-                hasError={hasPasswordError}
-              />
-            </View>
-          </View>
-
-          {/* Confirm Password */}
-          <View style={styles.bottomContainerItem}>
-            <CustomIcons icon={"Password"} />
-            <View style={{ flexDirection: "column" }}>
-              <TextView label={"Yeni Şifre (Tekrar)"} isBold={true} textStyle={text} />
-              <Input
-                label={"Yeni Şifre (Tekrar)"}
-                onUpdateValue={updateInput.bind(this, "confirmPassword")}
-                value={confirmPassword}
-                secure
-                hasError={hasConfirmPasswordError}
-              />
-            </View>
           </View>
 
 
-          {/* Change Password Button */}
-          <View style={[styles.buttonCon, { marginTop: 15 }]}>
-            <LinearGradient
-              colors={['#ff416c', '#ff4b2b']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.saveButtonHandle}
+          {/* Bottom Card (Options) */}
+          <View style={styles.bottomCard}>
+
+            {/* Monthly Info Change */}
+            <TouchableOpacity
+              onPress={monthlyClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
             >
-              <TouchableOpacity
-                style={styles.touchable}
-                onPress={saveButtonHandle}
-              >
-                <TextView label={"Şifreyi Değiştir"} textStyle={[text, { color: "white" }]} />
-              </TouchableOpacity>
-            </LinearGradient>
+              <TextView label={"Aylık Bilgilerimi Düzenle"} textStyle={text} />
+            </TouchableOpacity>
+
+            {/* User Note */}
+            <TouchableOpacity
+              onPress={noteClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Kişisel Notlarım"} textStyle={text} />
+            </TouchableOpacity>
+
+            {/* Notifications */}
+            <TouchableOpacity
+              onPress={notificationClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Bildirim Ayarları"} textStyle={text} />
+            </TouchableOpacity>
+
+            {/* Feedback */}
+            <TouchableOpacity
+              onPress={feedbackClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Sorun Bildir"} textStyle={text} />
+            </TouchableOpacity>
+
+
           </View>
 
-        </View>
 
-        <CustomAlert
-          visible={showAlert}
-          message="Çıkış yapmak istediğinize emin misiniz?"
-          onConfirm={() => {
-            logoutClickHandle()
-            setShowAlert(false);
-          }}
-          onCancel={() => setShowAlert(false)}
-        />
+          {/* Change Password */}
+          <View style={[card, styles.bottomContainer, { borderColor: tertiaryColor }]}>
 
-        {/* Logout */}
-        <TouchableOpacity
-          onPress={logoutAlert}
-          style={[card, { width: "100%", height: 60, justifyContent: "center", marginTop: 13 }]}
-        >
-          <TextView label={"Çıkış Yap"} textStyle={[text, { color: "red" }]} />
-        </TouchableOpacity>
+            <TextView label={"Şifre Değiştirme"} textStyle={text} isBold />
+
+            {/* Old Password */}
+            <View style={styles.bottomContainerItem}>
+              <CustomIcons icon={"Password"} />
+              <View style={{ flexDirection: "column" }}>
+                <TextView label={"Eski Şifre:"} isBold={true} textStyle={text} />
+                <Input
+                  label={"Eski Şifre"}
+                  onUpdateValue={updateInput.bind(this, "oldPassword")}
+                  value={oldPassword}
+                  secure
+                  hasError={hasOldPasswordError}
+                />
+              </View>
+            </View>
+
+            {/* New Password */}
+            <View style={styles.bottomContainerItem}>
+              <CustomIcons icon={"Password"} />
+              <View style={{ flexDirection: "column" }}>
+                <TextView label={"Yeni Şifre:"} isBold={true} textStyle={text} />
+                <Input
+                  label={"Yeni Şifre"}
+                  onUpdateValue={updateInput.bind(this, "newPassword")}
+                  value={newPassword}
+                  secure
+                  hasError={hasPasswordError}
+                />
+              </View>
+            </View>
+
+            {/* Confirm Password */}
+            <View style={styles.bottomContainerItem}>
+              <CustomIcons icon={"Password"} />
+              <View style={{ flexDirection: "column" }}>
+                <TextView label={"Yeni Şifre (Tekrar)"} isBold={true} textStyle={text} />
+                <Input
+                  label={"Yeni Şifre (Tekrar)"}
+                  onUpdateValue={updateInput.bind(this, "confirmPassword")}
+                  value={confirmPassword}
+                  secure
+                  hasError={hasConfirmPasswordError}
+                />
+              </View>
+            </View>
+
+
+            {/* Change Password Button */}
+            <View style={[styles.buttonCon, { marginTop: 15 }]}>
+              <LinearGradient
+                colors={['#ff416c', '#ff4b2b']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.saveButtonHandle}
+              >
+                <TouchableOpacity
+                  style={styles.touchable}
+                  onPress={saveButtonHandle}
+                >
+                  <TextView label={"Şifreyi Değiştir"} textStyle={[text, { color: "white" }]} />
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+
+          </View>
+
+          <CustomAlert
+            visible={showAlert}
+            message="Çıkış yapmak istediğinize emin misiniz?"
+            onConfirm={() => {
+              logoutClickHandle()
+              setShowAlert(false);
+            }}
+            onCancel={() => setShowAlert(false)}
+          />
+
+          {/* Logout */}
+          <TouchableOpacity
+            onPress={logoutAlert}
+            style={[card, { width: "100%", height: 60, justifyContent: "center", marginTop: 13 }]}
+          >
+            <TextView label={"Çıkış Yap"} textStyle={[text, { color: "red" }]} />
+          </TouchableOpacity>
 
 
 
-      </CustomContainer>
-    </SafeAreaView>
-  )
+        </CustomContainer>
+      </SafeAreaView>
+    )
+  }
 }
 
 export default MyProfileScreen
