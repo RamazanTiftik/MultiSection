@@ -75,7 +75,7 @@ const CustomIcons = ({ icon }) => {
                 ) : icon === "Bank" ? (
                     <FontAwesome name="bank" size={titleIconSize} color={secondaryColor} />
                 ) : icon === "Amount" ? (
-                    <FontAwesome5 name="money-bill-wave" size={titleIconSize} color={secondaryColor} />
+                    <FontAwesome5 name="money-bill-wave" size={17} color={secondaryColor} />
                 ) : icon === "Income" ? (
                     <View style={styles.income}>
                         <AntDesign name="arrowup" size={30} color="white" />

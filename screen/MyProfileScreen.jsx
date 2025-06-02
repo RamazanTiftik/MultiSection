@@ -38,6 +38,10 @@ const MyProfileScreen = ({ navigation }) => {
 
   //user data state
   const [userEmail, setUserEmail] = useState("")
+  const [userSalary, setUserSalary] = useState(0.0)
+  const [userExpense, setUserExpense] = useState(0.0)
+  const [userName, setUserName] = useState("")
+  const userSaving = parseFloat((userSalary - userExpense).toFixed(2));
 
   //redux
   const dispatch = useDispatch()
@@ -52,7 +56,6 @@ const MyProfileScreen = ({ navigation }) => {
   useEffect(() => {
     setLoading(true)
     //when screen is focused, clear inputs
-    //dispatch ile kontrol edilebilr bu durum
     setOldPassword("")
     setConfirmPassword("")
     setNewPassword("")
@@ -78,6 +81,9 @@ const MyProfileScreen = ({ navigation }) => {
         //users data
         const userData = docSnap.data();
         setUserEmail(userData.email)
+        setUserName(userData.name)
+        setUserSalary(userData.salary)
+        setUserExpense(userData.expense)
         return userData;
 
       } else {
@@ -191,7 +197,7 @@ const MyProfileScreen = ({ navigation }) => {
 
             {/* User Infos */}
             <View style={styles.titleTxtCon}>
-              <TextView label={"Ramazan Tiftik"} textStyle={text} />
+              <TextView label={userName} textStyle={text} />
               <TextView label={userEmail} textStyle={text} />
             </View>
 
@@ -200,15 +206,15 @@ const MyProfileScreen = ({ navigation }) => {
               <TextView label={"Düzenli (Aylık)"} textStyle={text} />
               <View style={styles.amountTxtCon}>
                 <View style={[styles.amountItem, { borderRightWidth: 2, borderRightColor: "#ddd" }]}>
-                  <TextView label={"30000$"} textStyle={profileText} />
+                  <TextView label={`${userSalary} ₺`} textStyle={profileText} />
                   <TextView label={"Maaş"} textStyle={text} />
                 </View>
                 <View style={styles.amountItem}>
-                  <TextView label={"10000$"} textStyle={profileText} />
+                  <TextView label={`${userExpense} ₺`} textStyle={profileText} />
                   <TextView label={"Gider"} textStyle={text} />
                 </View>
                 <View style={[styles.amountItem, { borderLeftColor: "#ddd", borderLeftWidth: 2 }]}>
-                  <TextView label={"20000$"} textStyle={profileText} />
+                  <TextView label={`${userSaving} ₺`} textStyle={profileText} />
                   <TextView label={"Tasarruf"} textStyle={text} />
                 </View>
               </View>
@@ -225,7 +231,7 @@ const MyProfileScreen = ({ navigation }) => {
               onPress={monthlyClickHandle}
               style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
             >
-              <TextView label={"Aylık Bilgilerimi Düzenle"} textStyle={text} />
+              <TextView label={"Kullanıcı Bilgilerimi Düzenle"} textStyle={text} />
             </TouchableOpacity>
 
             {/* User Note */}

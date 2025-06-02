@@ -102,10 +102,10 @@ const SignUpScreen = ({ navigation }) => {
             const userId = auth.currentUser.uid;
 
             //users/{userId}/outcome -> collection reference
-            const incomeRef = collection(db, "users", userId, "outcome");
+            const outcomeRef = collection(db, "users", userId, "outcome");
 
             //add document to outcome colection
-            const docRef = await addDoc(incomeRef, {
+            const docRef = await addDoc(outcomeRef, {
                 bankName: "",
                 createdDate: new Date(),
                 amount: "",

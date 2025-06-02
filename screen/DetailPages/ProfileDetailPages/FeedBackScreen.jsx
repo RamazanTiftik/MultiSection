@@ -1,11 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { BackHandler, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, BackHandler, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import CustomIcons from '../../../component/CustomIcons';
 import { themes } from '../../../theme/Themes';
 import CustomContainer from '../../../component/CustomContainer';
 import TextView from '../../../component/TextView';
 import Input from '../../../component/Input';
+import { auth } from '../../../firebaseConfig/Firebase';
+import { doc, getDoc, collection, addDoc, updateDoc } from "firebase/firestore";
+import { db } from '../../../firebaseConfig/Firebase';
 
 
 const FeedBackScreen = ({ navigation }) => {
@@ -17,6 +20,9 @@ const FeedBackScreen = ({ navigation }) => {
   //local text states
   const [feedBackText, setFeedBackText] = useState("")
   const [hasFeedBackTextError, setHasFeedBackTextError] = useState(false)
+
+  //loading state
+  const [loading, setLoading] = useState(false)
 
 
   //Back Button Func
@@ -60,16 +66,73 @@ const FeedBackScreen = ({ navigation }) => {
   }, [navigation]);
 
 
+  //add income collection for user
+  const saveFeedback = async () => {
+    try {
+      //get current user id
+      const userId = auth.currentUser.uid;
+
+      //Get the user document information
+      const userDocRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userDocRef);
+
+      if (!userSnap.exists()) {
+        throw new Error("Kullanıcı verisi bulunamadı.");
+      }
+
+      const userData = userSnap.data();
+      const userName = userData.name || "";
+
+      //users/{userId}/feedback -> collection reference
+      const feedbackRef = collection(db, "users", userId, "feedback");
+
+      //add document to feedback collection
+      const docRef = await addDoc(feedbackRef, {
+        userName: userName,
+        createdDate: new Date(),
+        userId: userId,
+        id: "",  // empty for now, will set later
+        feedback: feedBackText
+      });
+
+      //set document id
+      await updateDoc(docRef, {
+        id: docRef.id
+      });
+
+    } catch (error) {
+      Alert.alert("Hata", "Hata.")
+    }
+  };
+
+
   //sent button func
   const buttonClickHandle = () => {
-    console.log("feedback")
+    if (!feedBackText) {
+      setHasFeedBackTextError(true);
+
+    } else {
+      setLoading(true);
+      saveFeedback()
+        .then(() => {
+          setLoading(false);
+          /* navigation.reset({
+            index: 0,
+            routes: [{ name: "MyProfile" }]
+          }); */
+        })
+        .catch((error) => {
+          console.error("Error setting user data:", error);
+          setLoading(false);
+        });
+    }
   }
 
 
   //Input func
   function updateInput(inputType, enteredValue) {
     switch (inputType) {
-      case '':
+      case 'feedback':
         setFeedBackText(enteredValue);
         if (enteredValue.trim() !== "") setHasFeedBackTextError(false);
         break;
@@ -79,45 +142,53 @@ const FeedBackScreen = ({ navigation }) => {
 
 
   //VIEW
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
-      <CustomContainer>
+  if (loading) {
+    <View>
 
-        <View style={card}>
-          <TextView label={"Uygulamayla ilgili herhangi bir geri bildiriminiz varsa bildirebilirsiniz."} />
+    </View>
 
-          <View>
-            <Input
-              label={"Geri bildiriminizi yazınız"}
-              onUpdateValue={updateInput.bind(this, "feedback")}
-              value={feedBackText}
-              hasError={hasFeedBackTextError}
-            />
-          </View>
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
+        <CustomContainer>
+
+          <View style={[card, { alignItems: "center" }]}>
+            <TextView label={"Uygulamayla ilgili herhangi bir geri bildiriminiz varsa bildirebilirsiniz."} />
+
+            <View>
+              <Input
+                label={"Geri bildiriminizi yazınız"}
+                onUpdateValue={updateInput.bind(this, "feedback")}
+                value={feedBackText}
+                hasError={hasFeedBackTextError}
+                width={320}
+              />
+            </View>
 
 
-          {/* Save Button */}
-          <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
-            <LinearGradient
-              colors={['#56ab2f', '#a8e063']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.addButtonHandle}
-            >
-              <TouchableOpacity
-                style={styles.touchable}
-                onPress={buttonClickHandle}
+            {/* Save Button */}
+            <View style={{ marginTop: 15, width: 150 }}>
+              <LinearGradient
+                colors={['#56ab2f', '#a8e063']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.addButtonHandle}
               >
-                <Text style={styles.selectedBtnText}>{"Gönder"}</Text>
-              </TouchableOpacity>
-            </LinearGradient>
+                <TouchableOpacity
+                  style={styles.touchable}
+                  onPress={buttonClickHandle}
+                >
+                  <Text style={styles.btnText}>{"Gönder"}</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+
           </View>
 
-        </View>
-
-      </CustomContainer>
-    </SafeAreaView >
-  )
+        </CustomContainer>
+      </SafeAreaView >
+    )
+  }
 }
 
 export default FeedBackScreen
@@ -128,12 +199,17 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
+    width: 150,
   },
   touchable: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 15
+    borderRadius: 15,
   },
+  btnText: {
+    /* color: "white", */
+    fontSize: 16,
+    fontWeight: "500"
+  }
 })
