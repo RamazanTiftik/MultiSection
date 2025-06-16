@@ -9,6 +9,7 @@ import Input from '../../../component/Input';
 import { auth } from '../../../firebaseConfig/Firebase';
 import { doc, getDoc, collection, addDoc, updateDoc } from "firebase/firestore";
 import { db } from '../../../firebaseConfig/Firebase';
+import { useDispatch } from 'react-redux';
 
 
 const FeedBackScreen = ({ navigation }) => {
@@ -20,6 +21,11 @@ const FeedBackScreen = ({ navigation }) => {
   //local text states
   const [feedBackText, setFeedBackText] = useState("")
   const [hasFeedBackTextError, setHasFeedBackTextError] = useState(false)
+
+  //redux
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.auth.userId);
+  
 
   //loading state
   const [loading, setLoading] = useState(false)
@@ -53,7 +59,7 @@ const FeedBackScreen = ({ navigation }) => {
         fontSize: 18,
         backgroundColor: "red"
       },
-      headerTitle: "Geri",
+      headerTitle: "Sorun Bildir",
       headerLeft: () => (
         <TouchableOpacity onPress={() => backAction()}>
           <CustomIcons icon={"Back"} />

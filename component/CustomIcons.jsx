@@ -11,6 +11,7 @@ import Feather from '@expo/vector-icons/Feather';
 import Octicons from '@expo/vector-icons/Octicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import TextView from './TextView';
+import Foundation from '@expo/vector-icons/Foundation';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 
@@ -84,6 +85,11 @@ const CustomIcons = ({ icon }) => {
                     <View style={styles.outcome}>
                         <AntDesign name="arrowdown" size={30} color="white" />
                     </View>
+                ) : icon === "Add" ? (
+                    <View >
+                        <Foundation name="page-add" size={35} color={secondaryColor} />
+                    </View>
+
                 ) : null
             }
         </View >

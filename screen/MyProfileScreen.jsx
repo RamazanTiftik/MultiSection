@@ -10,10 +10,10 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig/Firebase';
 import { db } from '../firebaseConfig/Firebase';
 import { useDispatch } from 'react-redux'
-import { logout } from '../redux/slices/AuthSlice'
+import { changePassword, logout, logoutHandle } from '../redux/slices/AuthSlice'
 import CustomAlert from '../component/CustomAlert'
-import { logoutFirebase } from '../service/AuthService'
 import { doc, getDoc } from "firebase/firestore";
+import CustomPopup from '../component/CustomPopup'
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -48,6 +48,10 @@ const MyProfileScreen = ({ navigation }) => {
 
   //alert visible state
   const [showAlert, setShowAlert] = useState(false)
+  const [showErrorAlert, setShowErrorAlert] = useState(false)
+  const [errorAlertMessage, setErrorAlertMessage] = useState("")
+  const [showChangePasswordPopup, setShowChangePasswordPopup] = useState(false)
+  const [showChangePasswordPopupMessage, setShowChangePasswordPopupMessage] = useState("")
 
   //loading state
   const [loading, setLoading] = useState(false)
@@ -61,8 +65,12 @@ const MyProfileScreen = ({ navigation }) => {
     setNewPassword("")
 
     //gel user data from firestore func
-    getUserData()
-    setLoading(false)
+    const fetchData = async () => {
+      setLoading(true);
+      await getUserData();
+      setLoading(false);
+    };
+    fetchData();
   }, [])
 
 
@@ -127,8 +135,7 @@ const MyProfileScreen = ({ navigation }) => {
   //logout button handle
   const logoutClickHandle = async () => {
     try {
-      logoutFirebase()
-      dispatch(logout())
+      dispatch(logoutHandle())
 
     } catch (error) {
       console.log("Çıkış hatası:", error.message);
@@ -140,8 +147,9 @@ const MyProfileScreen = ({ navigation }) => {
   }
 
 
-  //save button handle
-  const saveButtonHandle = () => {
+  //change password input update handle
+  const changePasswordHandle = async () => {
+
     if (!oldPassword || !newPassword || !confirmPassword) {
       if (!oldPassword) {
         setHasOldPasswordError(true)
@@ -152,11 +160,68 @@ const MyProfileScreen = ({ navigation }) => {
       }
 
     } else {
-      console.log(34)
+      if (newPassword !== confirmPassword) {
+        setErrorAlertMessage("Yeni şifreler eşleşmiyor.");
+        setShowErrorAlert(true);
+        return;
+      }
+      if (newPassword.length < 6) {
+        setErrorAlertMessage("Yeni şifre en az 6 karakter olmalıdır.");
+        setShowErrorAlert(true);
+        return;
+      }
+      if (oldPassword === newPassword) {
+        setErrorAlertMessage("Yeni şifre eski şifre ile aynı olamaz.");
+        setShowErrorAlert(true);
+        return;
+      }
+
+      // Dispatch the change password action
+      setLoading(true);
+      const resultAction = await dispatch(changePassword({ oldPassword, newPassword }));
+      setLoading(false);
+
+      if (changePassword.fulfilled.match(resultAction)) {
+
+        //change password success
+        setShowChangePasswordPopupMessage("Şifreniz başarıyla değiştirildi.");
+        setShowChangePasswordPopup(true);
+
+        // Clear the input fields
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+
+      } else {
+        //change password error
+        const errorMsg = resultAction.payload || "Şifre değiştirilemedi.";
+        setErrorAlertMessage(errorMsg);
+        setShowErrorAlert(true);
+      }
     }
   }
 
 
+  //popup close handle
+  const popupCloseHandle = () => {
+    
+    //error popup close handle
+    setErrorAlertMessage("")
+    setShowErrorAlert(false)
+
+    //change password popup close handle
+    if (showChangePasswordPopup) {
+      // If the change password popup was closed, reset the password fields
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowChangePasswordPopupMessage("")
+    }
+    setShowChangePasswordPopup(false);
+  }
+
+
+  //update input values
   function updateInput(inputType, enteredValue) {
     switch (inputType) {
       case 'oldPassword':
@@ -323,7 +388,7 @@ const MyProfileScreen = ({ navigation }) => {
               >
                 <TouchableOpacity
                   style={styles.touchable}
-                  onPress={saveButtonHandle}
+                  onPress={changePasswordHandle}
                 >
                   <TextView label={"Şifreyi Değiştir"} textStyle={[text, { color: "white" }]} />
                 </TouchableOpacity>
@@ -332,6 +397,7 @@ const MyProfileScreen = ({ navigation }) => {
 
           </View>
 
+          {/* Logout Alert */}
           <CustomAlert
             visible={showAlert}
             message="Çıkış yapmak istediğinize emin misiniz?"
@@ -341,6 +407,13 @@ const MyProfileScreen = ({ navigation }) => {
             }}
             onCancel={() => setShowAlert(false)}
           />
+
+
+          {/* Error Pop-up */}
+          <CustomPopup visible={showErrorAlert} message={errorAlertMessage} onClose={popupCloseHandle} type={"error"} />
+
+          {/* Change Password Pop-up */}
+          <CustomPopup visible={showChangePasswordPopup} message={showChangePasswordPopupMessage} onClose={popupCloseHandle} type={"success"} />
 
           {/* Logout */}
           <TouchableOpacity

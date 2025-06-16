@@ -10,8 +10,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
 import { auth } from '../../firebaseConfig/Firebase';
 import { useDispatch } from 'react-redux'
-import { login } from '../../redux/slices/AuthSlice'
-import { autoSignIn, saveUserCredentials } from '../../service/AuthService'
+import { autoSignInHandle, login, loginHandle } from '../../redux/slices/AuthSlice'
 
 
 const SignInScreen = ({ navigation, onLogin }) => {
@@ -38,15 +37,8 @@ const SignInScreen = ({ navigation, onLogin }) => {
 
   //useEffect to check if user is already logged id
   useEffect(() => {
-    setLoading(true)
-    autoSignIn().then((isLoggedIn) => {
-      setLoading(false)
-      if (isLoggedIn) {
-        //user is already logged in
-        dispatch(login())
-      }
-    })
-  }, [])
+    dispatch(autoSignInHandle());
+  }, [dispatch]);
 
 
   //useEffect to reset email and password
@@ -70,10 +62,8 @@ const SignInScreen = ({ navigation, onLogin }) => {
       //user login is successful
       setLoading(true)
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        await saveUserCredentials(email, password);
+        dispatch(loginHandle({ email, password }))
         setLoading(false);
-        dispatch(login())
 
       } catch (error) {
         setLoading(false)

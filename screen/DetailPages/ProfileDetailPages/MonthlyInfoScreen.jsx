@@ -8,6 +8,8 @@ import TextView from '../../../component/TextView';
 import Input from '../../../component/Input';
 import { auth, db } from '../../../firebaseConfig/Firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserInfoById, updateUserDataById } from '../../../redux/slices/UserInfoSlice';
 
 
 const MonthlyInfoScreen = ({ navigation }) => {
@@ -17,17 +19,24 @@ const MonthlyInfoScreen = ({ navigation }) => {
   const card = themes.card.cardView
   const text = themes.textTheme.text
 
+  //redux
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.auth.userId);
+  const userInfo = useSelector((state) => state.userInfo.userInfo) || [];
+  const { name, email, salary, expense } = userInfo;
+
   //user data input state
-  const [userEmail, setUserEmail] = useState("")
-  const [userSalary, setUserSalary] = useState(0.0)
-  const [userExpense, setUserExpense] = useState(0.0)
-  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState(email || "")
+  const [userSalary, setUserSalary] = useState(salary || 0.0)
+  const [userExpense, setUserExpense] = useState(expense || 0.0)
+  const [userName, setUserName] = useState(name || "")
 
   //local text states
   const [hasUserEmailTextError, setHasUserEmailTextError] = useState(false)
   const [hasUserNameTextError, setHasUserNameTextError] = useState(false)
   const [hasUserSalaryTextError, setHasUserSalaryTextError] = useState(false)
   const [hasUserExpenseTextError, setHasUserExpenseTextError] = useState(false)
+
 
   //loading state
   const [loading, setLoading] = useState(false)
@@ -64,7 +73,7 @@ const MonthlyInfoScreen = ({ navigation }) => {
         fontSize: 18,
         backgroundColor: "red"
       },
-      headerTitle: "Geri",
+      headerTitle: "Kullanıcı Bilgilerim",
       headerLeft: () => (
         <TouchableOpacity onPress={() => backAction()}>
           <CustomIcons icon={"Back"} />
@@ -81,41 +90,12 @@ const MonthlyInfoScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
-      await getUserData()
+      /* await getUserData() */
+      await dispatch(getUserInfoById({ userId }))
       setLoading(false)
     }
     fetchData()
   }, [])
-
-
-
-  //get user data from firestore
-  async function getUserData() {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        return;
-      }
-
-      const userRef = doc(db, "users", user.uid); // UID ile dokümanı çek
-      const docSnap = await getDoc(userRef);
-
-      if (docSnap.exists()) {
-        //users data
-        const userData = docSnap.data();
-        setUserEmail(userData.email)
-        setUserName(userData.name)
-        setUserSalary(userData.salary?.toString() || "")
-        setUserExpense(userData.expense?.toString() || "")
-        return userData;
-
-      } else {
-        //user not found
-      }
-    } catch (error) {
-      //handle any errors
-    }
-  }
 
 
   //parse currency from formatted string
@@ -130,21 +110,10 @@ const MonthlyInfoScreen = ({ navigation }) => {
   //set user data to firestore
   async function setUserData(setName, setSalary, setExpense) {
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const userRef = doc(db, "users", user.uid);
       const numericValueSalary = parseCurrencyTR(setSalary)
       const numericValueExpense = parseCurrencyTR(setExpense)
 
-      await setDoc(userRef, {
-        name: setName,
-        salary: parseFloat(numericValueSalary),
-        expense: parseFloat(numericValueExpense),
-      }, { merge: true }); // merge: true => sadece bu alanları günceller, diğerleri silinmez
-
-      console.log("Kullanıcı verileri başarıyla güncellendi.");
-      // İstersen başarılı mesaj ya da navigasyon burada yapılabilir.
+      dispatch(updateUserDataById({ userId, name: setName, salary: parseFloat(numericValueSalary), expense: parseFloat(numericValueExpense) }))
     } catch (error) {
       console.error("Veri güncellenirken hata oluştu:", error);
     }
@@ -251,7 +220,7 @@ const MonthlyInfoScreen = ({ navigation }) => {
                   keyboardType="numeric"
                   onUpdateValue={updateInput.bind(this, 'userSalary')}
                   value={userSalary}
-                  label={"Aylık gelirinizi girin"}
+                  label={"1.000,00"}
                   hasError={hasUserSalaryTextError}
                   currency={"tl"}
                 />
@@ -268,7 +237,7 @@ const MonthlyInfoScreen = ({ navigation }) => {
                   keyboardType="numeric"
                   onUpdateValue={updateInput.bind(this, 'userExpense')}
                   value={userExpense}
-                  label={"1.000"}
+                  label={"1.000,00"}
                   hasError={hasUserExpenseTextError}
                   currency={"tl"}
                 />
