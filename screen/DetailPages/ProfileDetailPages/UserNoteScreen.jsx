@@ -7,7 +7,8 @@ import TextView from '../../../component/TextView';
 import IconButton from '../../../component/IconButton';
 import Input from '../../../component/Input';
 import { useDispatch, useSelector } from 'react-redux';
-import { saveUserNote } from '../../../redux/slices/UserNoteSlice';
+import { getAllUserNotes, saveUserNote } from '../../../redux/slices/UserNoteSlice';
+import UserNoteRow from '../../../component/FlatListRow/UserNoteRow';
 
 
 const UserNoteScreen = ({ navigation }) => {
@@ -27,7 +28,7 @@ const UserNoteScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const userNotes = useSelector((state) => state.userNote.userNotes) || [];
 
-
+    
     //Back Button Func
     const backAction = () => {
         navigation.reset({
@@ -85,9 +86,20 @@ const UserNoteScreen = ({ navigation }) => {
     }, [navigation]);
 
 
+    //Note card clicked & navigate to detail page
+    const noteCardClickHandle = (id) => {
+        navigation.navigate("User Note Detail", { noteId: id })
+    };
+
+
+    //get all user note when screen is focused
+    useEffect(() => {
+        dispatch(getAllUserNotes({ userId: userId }))
+    }, [dispatch])
+
+
     //Save Note Function
     const saveNote = () => {
-        console.log("Kaydedilen not:", noteText);
         dispatch(saveUserNote({ userId: userId, content: noteText }))
         setNoteText("")
         setModalVisible(false)
@@ -143,6 +155,16 @@ const UserNoteScreen = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
+
+
+            {/* User Notes */}
+            <View style={styles.notesContainer}>
+                {userNotes.map((item) => (
+                    <UserNoteRow key={item.id} content={item.content} onPress={() => noteCardClickHandle(item.id)} />
+                ))}
+            </View>
+
+
         </CustomContainer>
 
     )
@@ -184,5 +206,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
         marginTop: 10
-    }
+    },
+    notesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+    },
 })

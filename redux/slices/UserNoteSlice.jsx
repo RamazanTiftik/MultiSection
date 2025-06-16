@@ -15,11 +15,15 @@ export const getAllUserNotes = createAsyncThunk(
             const querySnapshot = await getDocs(q);
 
             // Clean up the data to ensure createdAt is in ISO string format
-            const notes = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdDate: doc.data().createdDate?.toDate().toISOString() || null
-            }));
+            const notes = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate().toISOString() || null,
+                    createdDate: data.createdDate?.toDate().toISOString() || null,
+                };
+            });
 
             return notes;
         } catch (error) {
@@ -47,7 +51,8 @@ export const getNoteById = createAsyncThunk(
             return {
                 id: docSnap.id,
                 ...noteData,
-                createdDate: noteData.createdDate?.toDate().toISOString() || null
+                createdAt: noteData.createdAt?.toDate().toISOString() || null,
+                createdDate: noteData.createdDate?.toDate().toISOString() || null,
             };
         } catch (error) {
             console.error("Firestore Error:", error);
@@ -129,7 +134,7 @@ const userNoteSlice = createSlice({
     name: 'userNote',
     initialState: {
         userNotes: [],
-        selectedNote: null,
+        selectedNote: {},
         loading: false,
         error: null,
     },

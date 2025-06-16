@@ -11,6 +11,7 @@ import FeedBackScreen from '../../screen/DetailPages/ProfileDetailPages/FeedBack
 import MonthlyInfoScreen from '../../screen/DetailPages/ProfileDetailPages/MonthlyInfoScreen';
 import UserNoteScreen from '../../screen/DetailPages/ProfileDetailPages/UserNoteScreen';
 import NotificationScreen from '../../screen/DetailPages/ProfileDetailPages/NotificationScreen';
+import SingleUserNoteScreen from '../../screen/DetailPages/UserNoteDetailPages/SingleUserNoteScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,7 @@ function ProfileStack() {
             <Stack.Screen name="Notification" component={NotificationScreen} />
             <Stack.Screen name="User Note" component={UserNoteScreen} />
             <Stack.Screen name="Mouthly Info" component={MonthlyInfoScreen} />
+            <Stack.Screen name="User Note Detail" component={SingleUserNoteScreen} />
         </Stack.Navigator>
     );
 }

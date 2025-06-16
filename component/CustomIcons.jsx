@@ -90,7 +90,13 @@ const CustomIcons = ({ icon }) => {
                         <Foundation name="page-add" size={35} color={secondaryColor} />
                     </View>
 
+                ) : icon === "Delete" ? (
+                    <View>
+                        <MaterialIcons name="delete-forever" size={35} color={secondaryColor}  />
+                    </View>
+
                 ) : null
+
             }
         </View >
     )
