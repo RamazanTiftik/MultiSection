@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -6,7 +5,6 @@ import {
     StyleSheet,
     TouchableWithoutFeedback,
     Keyboard,
-    View,
 } from 'react-native';
 import { themes } from '../theme/Themes';
 import { SafeAreaView } from 'react-native-safe-area-context';

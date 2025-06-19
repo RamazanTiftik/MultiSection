@@ -119,6 +119,7 @@ const PostDataScreen = ({ navigation }) => {
   }
 
 
+  //Text update func
   function updateInput(inputType, enteredValue) {
     switch (inputType) {
       case 'description':

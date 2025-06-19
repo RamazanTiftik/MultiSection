@@ -6,10 +6,10 @@ import { themes } from '../../../theme/Themes';
 import CustomContainer from '../../../component/CustomContainer';
 import TextView from '../../../component/TextView';
 import Input from '../../../component/Input';
-import { auth } from '../../../firebaseConfig/Firebase';
-import { doc, getDoc, collection, addDoc, updateDoc } from "firebase/firestore";
-import { db } from '../../../firebaseConfig/Firebase';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserInfoById } from '../../../redux/slices/UserInfoSlice';
+import { getAllFeedbacks, saveFeedback } from '../../../redux/slices/FeedbackSlice';
+import CustomPopup from '../../../component/CustomPopup';
 
 
 const FeedBackScreen = ({ navigation }) => {
@@ -25,10 +25,17 @@ const FeedBackScreen = ({ navigation }) => {
   //redux
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth.userId);
-  
+  const userInfo = useSelector((state) => state.userInfo.userInfo) || [];
+  const { name } = userInfo;
+  const feedbacks = useSelector((state) => state.feedback.feedbacks) || [];
 
   //loading state
   const [loading, setLoading] = useState(false)
+
+
+  //popup alert visible
+  const [showPopup, setShowPopup] = useState(false)
+
 
 
   //Back Button Func
@@ -72,44 +79,51 @@ const FeedBackScreen = ({ navigation }) => {
   }, [navigation]);
 
 
-  //add income collection for user
-  const saveFeedback = async () => {
-    try {
-      //get current user id
-      const userId = auth.currentUser.uid;
-
-      //Get the user document information
-      const userDocRef = doc(db, "users", userId);
-      const userSnap = await getDoc(userDocRef);
-
-      if (!userSnap.exists()) {
-        throw new Error("Kullanıcı verisi bulunamadı.");
-      }
-
-      const userData = userSnap.data();
-      const userName = userData.name || "";
-
-      //users/{userId}/feedback -> collection reference
-      const feedbackRef = collection(db, "users", userId, "feedback");
-
-      //add document to feedback collection
-      const docRef = await addDoc(feedbackRef, {
-        userName: userName,
-        createdDate: new Date(),
-        userId: userId,
-        id: "",  // empty for now, will set later
-        feedback: feedBackText
-      });
-
-      //set document id
-      await updateDoc(docRef, {
-        id: docRef.id
-      });
-
-    } catch (error) {
-      Alert.alert("Hata", "Hata.")
+  //when screen is focused
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      /* await getUserData() */
+      await dispatch(getUserInfoById({ userId }))
+      setLoading(false)
     }
+    fetchData()
+  }, [])
+
+
+  //fetch feedbacks
+  const fetchData = async () => {
+    setLoading(true)
+    /* await getUserData() */
+    await dispatch(getAllFeedbacks())
+    setLoading(false)
+  }
+
+  //when screen is focused
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+
+  //after popup closed
+  const navigateHandle = () => {
+    fetchData()
+    setShowPopup(false)
+  }
+
+  //save feedback handler
+  const saveFeedbackHandle = async () => {
+    dispatch(saveFeedback({ createdId: userId, createdName: name, feedbackText: feedBackText }))
+    setFeedBackText("");
+    setHasFeedBackTextError(false);
+    setShowPopup(true);
   };
+
+  //feedback row clicked
+  const feedbackRowClickHandle = (id) => {
+    //open modal
+
+  }
 
 
   //sent button func
@@ -119,7 +133,7 @@ const FeedBackScreen = ({ navigation }) => {
 
     } else {
       setLoading(true);
-      saveFeedback()
+      saveFeedbackHandle()
         .then(() => {
           setLoading(false);
           /* navigation.reset({
@@ -191,6 +205,52 @@ const FeedBackScreen = ({ navigation }) => {
 
           </View>
 
+
+          {/* Static Text */}
+          <TextView label={"SIKÇA SORULANLAR"} textStyle={styles.staticText} />
+
+
+          {/* FeedBack List */}
+          <View style={[card, { alignItems: "center", width: "100%" }]}>
+
+            {feedbacks.filter(item => item.isAccepted).length === 0 ? (
+              <Text style={{ marginTop: 10, fontStyle: "italic" }}>Henüz onaylanmış bir geri bildirim yok.</Text>
+            ) : (
+              feedbacks
+                .filter(item => item.isAccepted)
+                .map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={{
+                      marginVertical: 5,
+                      width: "100%",
+                      padding: 10,
+                      backgroundColor: "#f0f0f0",
+                      borderRadius: 10,
+                    }}
+                    onPress={() => { feedbackRowClickHandle(item.id) }}
+                  >
+                    <Text style={{ fontWeight: "bold" }}>{item.createdName}</Text>
+                    <Text>{item.feedbackText || "Henüz cevap verilmedi."}</Text>
+                    <Text style={{ fontSize: 12, color: "gray", marginTop: 5 }}>
+                      {item.createdAt ? new Date(item.createdAt).toLocaleString() : "Tarih yok"}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+            )}
+
+          </View>
+
+
+          {/* Save Feedback Popup */}
+          <CustomPopup
+            visible={showPopup}
+            message={"Geri bildiriminiz başarıyla gönderilmiştir."}
+            onClose={navigateHandle}
+            type={"Success"}
+          />
+
+
         </CustomContainer>
       </SafeAreaView >
     )
@@ -217,5 +277,12 @@ const styles = StyleSheet.create({
     /* color: "white", */
     fontSize: 16,
     fontWeight: "500"
+  },
+  staticText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#007AFF",
+    marginVertical: 10,
+    textAlign: "center",
   }
 })

@@ -9,6 +9,8 @@ import CustomPopup from '../../../component/CustomPopup';
 import { deleteNoteById, getNoteById } from '../../../redux/slices/UserNoteSlice';
 import TextView from '../../../component/TextView';
 import Input from '../../../component/Input';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const SingleUserNoteScreen = ({ route, navigation }) => {
 
@@ -26,8 +28,11 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
     const userId = useSelector((state) => state.auth.userId);
     const dispatch = useDispatch();
     const { content, createdAt } = useSelector((state) => state.userNote.selectedNote)
-    console.log(content, 3
-    )
+    const loading = useSelector((state) => state.userNote.loading)
+
+    //general loading
+    const [generalLoading, setGeneralLoading] = useState(loading)
+
     // Local text states
     const [noteText, setNoteText] = useState(content);
     const [noteCreatedAtText, setNoteCreatedAtText] = useState(createdAt);
@@ -91,6 +96,11 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
         setShowPopup(true)
     }
 
+    //update user note handle
+    const saveButtonHandle = () => {
+        console.log(3)
+    }
+
     //delete user note handle 
     const showAlertHandle = () => {
         setShowAlert(true);
@@ -108,38 +118,141 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
         dispatch(getNoteById({ userId: userId, noteId: noteId }))
     }, [dispatch])
 
+    //set data for ui when screen is focused
+    useEffect(() => {
+        setGeneralLoading(true)
+
+        //set texts
+        setNoteText(content)
+        setNoteCreatedAtText(createdAt)
+
+        setGeneralLoading(false)
+    }, [dispatch, content, createdAt])
+
+
+    //Text update func
+    function updateInput(inputType, enteredValue) {
+        switch (inputType) {
+            case 'noteText':
+                setNoteText(enteredValue);
+                break;
+        }
+    }
+
 
     //VIEW
-    return (
-        <CustomContainer>
+    if (generalLoading) {
+        return (
+            <View>
+                <Text>234</Text>
+            </View>
+        )
 
-            {/* Note Text */}
-            <Input label={content} />
+    } else {
+        return (
+            <CustomContainer>
+
+                {/* CreatedAt Text */}
+                <Text style={styles.createdAtText}>
+                    Oluşturulma: {noteCreatedAtText ? new Date(noteCreatedAtText).toLocaleString('tr-TR') : '—'}
+                </Text>
 
 
-            {/* Logout Alert */}
-            <CustomAlert
-                visible={showAlert}
-                message="Notu silmek istediğinizden emin misiniz?"
-                onConfirm={() => {
-                    deleteNoteHandle()
-                    setShowAlert(false);
-                }}
-                onCancel={() => setShowAlert(false)}
-            />
+                {/* Note Text */}
+                <Input
+                    onUpdateValue={updateInput.bind(this, "noteText")}
+                    value={noteText}
+                    label={"Lütfen notunuzu giriniz"}
+                    multiline={true}
+                    style={styles.noteInput}
+                    maxLength={500}
+                />
 
-            {/* Delete Note Popup */}
-            <CustomPopup
-                visible={showPopup}
-                message={"Notunuz başarıyla silinmiştir."}
-                onClose={navigateHandle}
-                type={"Success"}
-            />
 
-        </CustomContainer>
-    )
+                {/* Add Button */}
+                <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
+                    <LinearGradient
+                        colors={['#f0f0f0', '#e0e0e0']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.addButtonHandle}
+                    >
+                        <TouchableOpacity
+                            style={styles.touchable}
+                            onPress={saveButtonHandle}
+                        >
+                            <Text style={styles.selectedBtnText}>{"Kaydet"}</Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                </View>
+
+
+
+
+                {/* Logout Alert */}
+                <CustomAlert
+                    visible={showAlert}
+                    message="Notu silmek istediğinizden emin misiniz?"
+                    onConfirm={() => {
+                        deleteNoteHandle()
+                        setShowAlert(false);
+                    }}
+                    onCancel={() => setShowAlert(false)}
+                />
+
+                {/* Delete Note Popup */}
+                <CustomPopup
+                    visible={showPopup}
+                    message={"Notunuz başarıyla silinmiştir."}
+                    onClose={navigateHandle}
+                    type={"Success"}
+                />
+
+            </CustomContainer >
+        )
+    }
 }
 
 export default SingleUserNoteScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    createdAtText: {
+        fontSize: 14,
+        color: '#888',
+        marginBottom: 10,
+        textAlign: 'right',
+    },
+    noteInput: {
+        fontSize: 16,
+        minHeight: 420,
+        textAlignVertical: 'top',
+        backgroundColor: '#f9f9f9',
+        padding: 12,
+        borderRadius: 10,
+        borderColor: '#ccc',
+        borderWidth: 1,
+    },
+    touchable: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 15,
+    },
+    addButtonHandle: {
+        borderRadius: 15,
+        height: 40,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "90%",
+        marginTop: 20
+    },
+    selectedBtnText: {
+        fontWeight: 600,
+        fontSize: 18,
+        color: "#000000"
+    },
+    inputCard: {
+        flexDirection: "row",
+        marginBottom: 20
+    },
+})

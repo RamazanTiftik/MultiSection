@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TextInput } from 'react-native'
 import React, { useState } from 'react'
 
-const Input = ({ label, keyboardType, onUpdateValue, value, secure, maxLength, hasError, width, disabled, currency }) => {
+const Input = ({ label, keyboardType, onUpdateValue, value, secure, maxLength, hasError, width, disabled, currency, style }) => {
 
   const [isFocused, setIsFocused] = useState(false);
 
@@ -32,6 +32,7 @@ const Input = ({ label, keyboardType, onUpdateValue, value, secure, maxLength, h
       <View style={styles.inputContainer}>
         <TextInput
           style={[
+            style && style,
             styles.input,
             isFocused && styles.focused,
             hasError && styles.errorBorder,

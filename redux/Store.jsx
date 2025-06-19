@@ -3,6 +3,7 @@ import authReducer from './slices/AuthSlice';
 import notificationReducer from "./slices/NotificationSlice"
 import userInfoReducer from "./slices/UserInfoSlice";
 import userNoteReducer from "./slices/UserNoteSlice"
+import feedbackReducer from "./slices/FeedbackSlice";
 
 
 export const store = configureStore({
@@ -10,6 +11,7 @@ export const store = configureStore({
     auth: authReducer,
     notification: notificationReducer,
     userInfo: userInfoReducer,
-    userNote: userNoteReducer
+    userNote: userNoteReducer,
+    feedback: feedbackReducer
   },
 });
