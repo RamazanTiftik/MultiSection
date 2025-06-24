@@ -8,6 +8,7 @@ import CustomIcons from '../component/CustomIcons'
 import CustomFlatList from '../component/CustomFlatlist'
 import CustomBarChart from '../component/Graph/CustomBarChart'
 import AccountTransactionsRow from '../component/FlatListRow/AccountTransactionsRow'
+import { runAI } from '../firebaseConfig/AI'
 
 const HomeScreen = ({ navigation }) => {
 
@@ -61,7 +62,9 @@ const HomeScreen = ({ navigation }) => {
   const summaryButtonHandle = () => {
     setSelectedButton("Özet")
   }
-
+/*   runAI("Merhaba, nasılsın?").then(response => {
+    console.log("AI Response:", response);
+  }) */
 
   //VIEW
   return (

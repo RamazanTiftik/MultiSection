@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import CustomContainer from '../../component/CustomContainer'
 import CustomFlatlist from '../../component/CustomFlatlist'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -11,7 +11,9 @@ import TextView from '../../component/TextView'
 import Input from '../../component/Input'
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AccountTransactionsRow from '../../component/FlatListRow/AccountTransactionsRow'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { savePostData } from '../../redux/slices/PostDataSlice'
+import { Timestamp } from 'firebase/firestore'
 
 
 const PostDataScreen = ({ navigation }) => {
@@ -48,6 +50,10 @@ const PostDataScreen = ({ navigation }) => {
   const yesOrNo = [
     { id: 1, value: "No" }, { id: 2, value: "Yes" }
   ]
+
+  //redux state
+  const dispatch = useDispatch()
+  const userId = useSelector((state) => state.auth.userId);
 
   //datas local state
   const [selectedMonth, setSelectedMonth] = useState(months[0])
@@ -98,14 +104,23 @@ const PostDataScreen = ({ navigation }) => {
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const handleConfirm = (date) => {
-    setSelectedDate(date.toLocaleDateString());
+    setSelectedDate(date.toLocaleDateString())
     hideDatePicker();
+  };
+
+
+  //parse currency from formatted string
+  const parseCurrencyTR = (formatted) => {
+    if (!formatted) return 0;
+    return parseFloat(
+      formatted.replace(/\./g, "").replace(",", ".") // "3.500,00" → 3500.00
+    );
   };
 
 
   //add btn handle
   const addButtonHandle = () => {
-    if (!amount || !selectedDate) {
+    if (!parseCurrencyTR(amount) || !selectedDate) {
       if (!amount) {
         setHasAmountError(true)
       } else if (!selectedDate) {
@@ -113,8 +128,71 @@ const PostDataScreen = ({ navigation }) => {
       }
 
     } else {
-      //make it 
-      console.log("bas")
+      //check is it income or outcome
+      if (selectedButton === "Gelir") {
+
+        //parse amount 
+        const numericValueAmount = parseCurrencyTR(amount)
+
+        //save income data to redux
+        const isSuccess = dispatch(savePostData({
+          userId: userId,
+          selectedButton: selectedButton,
+          amount: parseFloat(numericValueAmount),
+          description: description,
+          bankName: selectedBank.value,
+          isMonthly: selectedChoose.value === "Yes" ? true : false,
+          createdAt: selectedDate instanceof Date
+            ? Timestamp.fromDate(selectedDate)
+            : Timestamp.now()
+        }))
+
+        // Reset input fields after adding income
+        setDescription("");
+        setAmount("");
+        setSelectedDate("");
+        setSelectedBank(banks[0]);
+        setSelectedChoose(yesOrNo[0]);
+
+        if (isSuccess) {
+          // Navigate to the home screen after adding income
+          navigation.navigate("Home");
+        }
+
+      }
+      else if (selectedButton === "Gider") {
+
+        //parse amount 
+        const numericValueAmount = parseCurrencyTR(amount)
+
+        //save income data to redux
+        const isSuccess = dispatch(savePostData({
+          userId: userId,
+          selectedButton: selectedButton,
+          amount: parseFloat(numericValueAmount),
+          description: description,
+          bankName: selectedBank.value,
+          category: selectedCategory.value,
+          isMonthly: selectedChoose.value === "Yes" ? true : false,
+          createdAt: selectedDate instanceof Date
+            ? Timestamp.fromDate(selectedDate)
+            : Timestamp.now()
+        }))
+
+        // Reset input fields after adding income
+        setDescription("");
+        setAmount("");
+        setSelectedDate("");
+        setSelectedBank(banks[0]);
+        setSelectedChoose(yesOrNo[0]);
+
+        if (isSuccess) {
+          // Navigate to the home screen after adding income
+          navigation.navigate("Home");
+        }
+
+      }
+
     }
   }
 
@@ -128,16 +206,7 @@ const PostDataScreen = ({ navigation }) => {
         break;
 
       case 'amount':
-        // Sadece sayılar ve tek bir nokta (.) izin ver
-        const filtered = enteredValue.replace(/[^0-9.]/g, '');
-
-        // Eğer birden fazla nokta varsa sadece ilkini bırak
-        const parts = filtered.split('.');
-        const sanitized = parts.length > 2
-          ? parts[0] + '.' + parts.slice(1).join('').replace(/\./g, '')
-          : filtered;
-
-        setAmount(sanitized);
+        setAmount(enteredValue);
         if (enteredValue.trim() !== "") setHasAmountError(false);
         break;
 
@@ -231,9 +300,10 @@ const PostDataScreen = ({ navigation }) => {
                   <Input
                     onUpdateValue={updateInput.bind(this, "amount")}
                     value={amount}
-                    label={"0.00$"}
+                    label={"0.00"}
                     hasError={hasAmountError}
                     keyboardType={"numeric"}
+                    currency={"tl"}
                   />
                 </View>
               </View>
@@ -345,9 +415,10 @@ const PostDataScreen = ({ navigation }) => {
                   <Input
                     onUpdateValue={updateInput.bind(this, "amount")}
                     value={amount}
-                    label={"0.00$"}
+                    label={"0.00"}
                     hasError={hasAmountError}
                     keyboardType={"numeric"}
+                    currency={"tl"}
                   />
                 </View>
               </View>

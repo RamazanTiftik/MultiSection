@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { Alert, BackHandler, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, BackHandler, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import CustomIcons from '../../../component/CustomIcons';
 import { themes } from '../../../theme/Themes';
@@ -32,6 +32,11 @@ const FeedBackScreen = ({ navigation }) => {
   //loading state
   const [loading, setLoading] = useState(false)
 
+  //modal visible
+  const [modalVisible, setModalVisible] = useState(false);
+
+  //selected feedback state
+  const [selectedFeedback, setSelectedFeedback] = useState({});
 
   //popup alert visible
   const [showPopup, setShowPopup] = useState(false)
@@ -120,9 +125,9 @@ const FeedBackScreen = ({ navigation }) => {
   };
 
   //feedback row clicked
-  const feedbackRowClickHandle = (id) => {
-    //open modal
-
+  const feedbackRowClickHandle = (item) => {
+    setSelectedFeedback(item);
+    setModalVisible(true);
   }
 
 
@@ -228,7 +233,7 @@ const FeedBackScreen = ({ navigation }) => {
                       backgroundColor: "#f0f0f0",
                       borderRadius: 10,
                     }}
-                    onPress={() => { feedbackRowClickHandle(item.id) }}
+                    onPress={() => { feedbackRowClickHandle(item) }}
                   >
                     <Text style={{ fontWeight: "bold" }}>{item.createdName}</Text>
                     <Text>{item.feedbackText || "Henüz cevap verilmedi."}</Text>
@@ -250,6 +255,41 @@ const FeedBackScreen = ({ navigation }) => {
             type={"Success"}
           />
 
+
+          {/* Selected feedback modal */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              justifyContent: 'center',
+              padding: 20,
+            }}>
+              <View style={{
+                backgroundColor: 'white',
+                borderRadius: 10,
+                padding: 20,
+                maxHeight: '80%',
+              }}>
+                <ScrollView>
+                  <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>
+                    {selectedFeedback?.createdName || 'İsim yok'}
+                  </Text>
+                  <Text style={{ marginBottom: 15 }}>
+                    {selectedFeedback?.answer || 'Geri bildirim yok.'}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: 'gray' }}>
+                    {selectedFeedback?.createdAt ? new Date(selectedFeedback.createdAt).toLocaleString() : ''}
+                  </Text>
+                </ScrollView>
+                <Button title="Kapat" onPress={() => setModalVisible(false)} />
+              </View>
+            </View>
+          </Modal>
 
         </CustomContainer>
       </SafeAreaView >

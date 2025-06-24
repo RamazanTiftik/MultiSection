@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
         maxHeight: 150,
         elevation: 5,
         zIndex: 999,
-        marginTop: 25
+        
     },
     row: {
         flexDirection: 'row',

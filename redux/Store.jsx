@@ -4,6 +4,7 @@ import notificationReducer from "./slices/NotificationSlice"
 import userInfoReducer from "./slices/UserInfoSlice";
 import userNoteReducer from "./slices/UserNoteSlice"
 import feedbackReducer from "./slices/FeedbackSlice";
+import postDataReducer from "./slices/PostDataSlice";
 
 
 export const store = configureStore({
@@ -12,6 +13,7 @@ export const store = configureStore({
     notification: notificationReducer,
     userInfo: userInfoReducer,
     userNote: userNoteReducer,
-    feedback: feedbackReducer
+    feedback: feedbackReducer,
+    postData: postDataReducer,
   },
 });
