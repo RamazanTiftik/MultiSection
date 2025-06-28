@@ -1,5 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, View } from 'react-native'
 import CustomIcons from '../CustomIcons'
 import TextView from '../TextView'
 import { themes } from '../../theme/Themes'
@@ -24,13 +23,13 @@ const AccountTransactionsRow = ({ title, date, amount, type }) => {
                     {
                         type === "Gelir" ? (
                             <View>
-                                <TextView label={"Maaş"} textStyle={text} />
-                                <TextView label={"01.03.20025"} textStyle={text} />
+                                <TextView label={title} textStyle={text} />
+                                <TextView label={date} textStyle={text} />
                             </View>
                         ) : (
                             <View>
-                                <TextView label={"Spotify"} textStyle={text} />
-                                <TextView label={"01.03.20025"} textStyle={text} />
+                                <TextView label={title} textStyle={text} />
+                                <TextView label={date} textStyle={text} />
                             </View>
                         )
                     }
@@ -38,7 +37,7 @@ const AccountTransactionsRow = ({ title, date, amount, type }) => {
                 </View>
             </View>
             <View style={styles.rightSide}>
-                <TextView label={"400$"} textStyle={text} />
+                <TextView label={`${amount} ₺`} textStyle={text} />
             </View>
         </View>
     )

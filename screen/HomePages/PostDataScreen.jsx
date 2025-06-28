@@ -12,8 +12,9 @@ import Input from '../../component/Input'
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AccountTransactionsRow from '../../component/FlatListRow/AccountTransactionsRow'
 import { useDispatch, useSelector } from 'react-redux'
-import { savePostData } from '../../redux/slices/PostDataSlice'
+import { getAllBankNames, getAllCategories, savePostData } from '../../redux/slices/PostDataSlice'
 import { Timestamp } from 'firebase/firestore'
+import { getFilteredPostData } from '../../redux/slices/HomePageSlice'
 
 
 const PostDataScreen = ({ navigation }) => {
@@ -39,14 +40,6 @@ const PostDataScreen = ({ navigation }) => {
     { id: 1, value: "2023" }, { id: 2, value: "2024" },
     { id: 3, value: "2025" }, { id: 4, value: "2026" }
   ]
-  const banks = [
-    { id: 1, value: "Akbank" }, { id: 2, value: "Yapı Kredi" }, { id: 3, value: "Garanti" },
-    { id: 4, value: "Qnb" }, { id: 5, value: "Ziraat" }, { id: 6, value: "Vakıfbank" }
-  ]
-  const categories = [
-    { id: 1, value: "Market" }, { id: 2, value: "Giysi" }, { id: 3, value: "Kozmetik" },
-    { id: 4, value: "Eğlence" }, { id: 5, value: "Ev Kirası" }, { id: 6, value: "Diğer" }
-  ]
   const yesOrNo = [
     { id: 1, value: "No" }, { id: 2, value: "Yes" }
   ]
@@ -54,12 +47,15 @@ const PostDataScreen = ({ navigation }) => {
   //redux state
   const dispatch = useDispatch()
   const userId = useSelector((state) => state.auth.userId);
+  const categories = useSelector((state) => state.postData.categories);
+  const banks = useSelector((state) => state.postData.bankNames);
+  const postDatas = useSelector((state) => state.homePage.filteredPostDatas);
 
   //datas local state
-  const [selectedMonth, setSelectedMonth] = useState(months[0])
-  const [selectedYear, setSelectedYear] = useState(years[2])
-  const [selectedBank, setSelectedBank] = useState(banks[0])
-  const [selectedCategory, setSelectedCategory] = useState(categories[0])
+  const [selectedMonth, setSelectedMonth] = useState(months[5])
+  const [selectedYear, setSelectedYear] = useState(years[3])
+  const [selectedBank, setSelectedBank] = useState(null)
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedChoose, setSelectedChoose] = useState(yesOrNo[0])
 
   //input states
@@ -86,6 +82,34 @@ const PostDataScreen = ({ navigation }) => {
   const outcomeButtonHandle = () => {
     setSelectedButton("Gider")
   }
+
+
+  useEffect(() => {
+
+    dispatch(getFilteredPostData({ userId, selectedButton, month: selectedMonth.value, year: selectedYear.value }))
+  }, [userId, selectedButton, selectedMonth, selectedYear])
+
+
+  //fetch banks and categories when the component mounts
+  useEffect(() => {
+    // Fetch banks and categories when the component mounts
+    dispatch(getAllBankNames());
+    dispatch(getAllCategories());
+  }, [dispatch])
+
+
+  //set default bank and category when data is fetched
+  useEffect(() => {
+    if (banks && banks.length > 0 && !selectedBank) {
+      setSelectedBank(banks[0]);
+    }
+  }, [banks]);
+
+  useEffect(() => {
+    if (categories && categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories]);
 
 
   //remove data when button focus is changed
@@ -528,13 +552,17 @@ const PostDataScreen = ({ navigation }) => {
             <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
           </View>
 
-          {years.map(item => (
+          {postDatas.map(item => (
             <View key={item.id} style={card}>
               <AccountTransactionsRow
-                title={[]}
-                amount={amount}
-                date={selectedDate}
-                type={selectedButton}
+                title={item.description || "Açıklama Yok"}
+                amount={item.amount || "0,00"}
+                date={
+                  item.createdAt
+                    ? new Date(item.createdAt).toLocaleDateString('tr-TR')
+                    : "Tarih Yok"
+                }
+                type={item.category ? "Gider" : "Gelir"}
               />
             </View>
           ))}

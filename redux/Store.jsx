@@ -5,6 +5,7 @@ import userInfoReducer from "./slices/UserInfoSlice";
 import userNoteReducer from "./slices/UserNoteSlice"
 import feedbackReducer from "./slices/FeedbackSlice";
 import postDataReducer from "./slices/PostDataSlice";
+import homePageReducer from "./slices/HomePageSlice";
 
 
 export const store = configureStore({
@@ -15,5 +16,6 @@ export const store = configureStore({
     userNote: userNoteReducer,
     feedback: feedbackReducer,
     postData: postDataReducer,
+    homePage: homePageReducer, 
   },
 });
