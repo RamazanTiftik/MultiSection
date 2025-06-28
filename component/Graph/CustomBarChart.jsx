@@ -44,7 +44,7 @@ const CustomFlatBarChart = ({ data, onPressAction, type }) => {
                 keyExtractor={(item) => item.label}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 renderItem={({ item }) => {
-                    const barHeight = (item.value / maxValue) * chartHeight;
+                    const barHeight = (item.value / maxValue) * chartHeight / 1.03;
                     const gradientColors = getSeasonColor(item.label);
                     const isSelected = selectedItem?.label === item.label;
 
@@ -55,25 +55,24 @@ const CustomFlatBarChart = ({ data, onPressAction, type }) => {
                         >
                             <View style={{
                                 height: chartHeight,
+                                width: 50,
+                                position: 'relative',
                                 justifyContent: 'flex-end',
-                                alignItems: "center"
+                                alignItems: 'center',
                             }}>
-                                <TextView
-                                    label={item.value}
-                                    textStyle={{ fontSize: 16, fontWeight: "500", color: "gray" }}
-                                />
-
                                 <LinearGradient
                                     colors={gradientColors}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 0, y: 1 }}
                                     style={{
-                                        height: barHeight,
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        height: barHeight || 8,
                                         width: 50,
                                         borderTopLeftRadius: 4,
                                         borderTopRightRadius: 4,
                                         borderWidth: isSelected ? 2 : 0,
-                                        borderColor: isSelected ? type==="Gelir" ? '#56ab2f' : "#e74c3c" : 'transparent',
+                                        borderColor: isSelected ? (type === "Gelir" ? '#56ab2f' : "#e74c3c") : 'transparent',
                                         shadowColor: isSelected ? '#000' : undefined,
                                         shadowOffset: isSelected ? { width: 0, height: 2 } : undefined,
                                         shadowOpacity: isSelected ? 0.25 : 0,
@@ -86,6 +85,7 @@ const CustomFlatBarChart = ({ data, onPressAction, type }) => {
                         </TouchableOpacity>
                     );
                 }}
+
                 showsHorizontalScrollIndicator={false}
             />
         </View>

@@ -280,7 +280,7 @@ const MyProfileScreen = ({ navigation }) => {
                 </View>
                 <View style={[styles.amountItem, { borderLeftColor: "#ddd", borderLeftWidth: 2 }]}>
                   <TextView label={`${userSaving} ₺`} textStyle={profileText} />
-                  <TextView label={"Tasarruf"} textStyle={text} />
+                  <TextView label={"Kalan"} textStyle={text} />
                 </View>
               </View>
             </View>

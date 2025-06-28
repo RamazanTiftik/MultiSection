@@ -66,9 +66,7 @@ export const getFilteredPostData = createAsyncThunk(
                     createdAt: (data.createdAt?.toDate?.() || data.createdAt)?.toString() ?? null
 
                 };
-            });
-
-
+            })
 
             return results;
         } catch (error) {
@@ -79,6 +77,38 @@ export const getFilteredPostData = createAsyncThunk(
 );
 
 
+// Get yearly post data based on userId, selectedButton, and year -> for group up by month
+export const getYearlyPostData = createAsyncThunk(
+    'homePage/getYearlyPostData',
+    async ({ userId, selectedButton, year }, thunkAPI) => {
+        try {
+            const collectionName = selectedButton === "Gelir" ? "Income" : "Expense";
+            const ref = collection(db, "users", userId, collectionName);
+
+            const start = Timestamp.fromDate(new Date(`${year}-01-01`));
+            const end = Timestamp.fromDate(new Date(`${parseInt(year) + 1}-01-01`));
+
+            const q = query(ref, where("createdAt", ">=", start), where("createdAt", "<", end));
+            const snapshot = await getDocs(q);
+
+            const posts = snapshot.docs.map(doc => {
+                const data = doc.data();
+
+                return {
+                    ...data,
+                    createdAt: data.createdAt?.toDate().toISOString() ?? null
+                };
+            });
+
+            return posts;
+
+
+        } catch (error) {
+            console.error("Yıl verisi alınamadı:", error);
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+);
 
 
 const homePageSlice = createSlice({
@@ -87,6 +117,7 @@ const homePageSlice = createSlice({
         loading: false,
         error: null,
         filteredPostDatas: [],
+        yearlyPostDatas: [],
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -104,7 +135,22 @@ const homePageSlice = createSlice({
             .addCase(getFilteredPostData.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+
+            // Get yearly post data
+            .addCase(getYearlyPostData.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getYearlyPostData.fulfilled, (state, action) => {
+                state.loading = false;
+                state.yearlyPostDatas = action.payload;
+            })
+            .addCase(getYearlyPostData.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             });
+
     },
 
 });

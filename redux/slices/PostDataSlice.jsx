@@ -58,12 +58,12 @@ export const getAllCategories = createAsyncThunk(
 );
 
 
-//save feedback
+//save post data
 export const savePostData = createAsyncThunk(
     'postData/savePostData',
     async ({ userId, selectedButton, amount, description, bankName, createdAt, isMonthly, category }, thunkAPI) => {
         try {
-
+            
             const postDataId = uuidv4(); // random id for postData
             let postDataRef = ""
 

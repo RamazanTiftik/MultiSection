@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import CustomContainer from '../component/CustomContainer'
 import TextView from '../component/TextView'
 import { themes } from '../theme/Themes'
@@ -9,6 +9,8 @@ import CustomFlatList from '../component/CustomFlatlist'
 import CustomBarChart from '../component/Graph/CustomBarChart'
 import AccountTransactionsRow from '../component/FlatListRow/AccountTransactionsRow'
 import { runAI } from '../firebaseConfig/AI'
+import { useDispatch, useSelector } from 'react-redux'
+import { getFilteredPostData, getYearlyPostData } from '../redux/slices/HomePageSlice'
 
 const HomeScreen = ({ navigation }) => {
 
@@ -30,6 +32,12 @@ const HomeScreen = ({ navigation }) => {
     { label: 'Aralık', value: 75 },
   ];
 
+  //redux state
+  const dispatch = useDispatch()
+  const userId = useSelector((state) => state.auth.userId);
+  const postDatas = useSelector((state) => state.homePage.filteredPostDatas);
+  const yearlyPostDatas = useSelector((state) => state.homePage.yearlyPostDatas);
+
   //theme
   const secondaryColor = themes.colorTheme.secondary.color
   const tertiaryColor = themes.colorTheme.tertiary.color
@@ -38,13 +46,6 @@ const HomeScreen = ({ navigation }) => {
   const titleTxt = themes.textTheme.titleTxt
   const profileText = themes.textTheme.profileText
 
-  const years = [
-    { id: 1, value: "2023" }, { id: 2, value: "2024" },
-    { id: 3, value: "2025" }, { id: 4, value: "2026" }
-  ]
-
-  //local states
-  const [selectedYear, setSelectedYear] = useState(years[2])
 
   //selectedColumn state from component
   const [selectedItem, setSelectedItem] = useState({})
@@ -62,9 +63,75 @@ const HomeScreen = ({ navigation }) => {
   const summaryButtonHandle = () => {
     setSelectedButton("Özet")
   }
-/*   runAI("Merhaba, nasılsın?").then(response => {
-    console.log("AI Response:", response);
-  }) */
+
+
+  // Function to generate years dynamically
+  const generateYears = (range = 3) => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+
+    for (let i = -range; i <= range; i++) {
+      years.push({ id: currentYear + i, value: String(currentYear + i) });
+    }
+
+    return years;
+  };
+
+  const [years] = useState(generateYears());
+  const [selectedYear, setSelectedYear] = useState(
+    years.find(item => item.value === String(new Date().getFullYear()))
+  );
+
+
+  //Get filtered post data based on selected month and year
+  useEffect(() => {
+
+    //for graph data
+    if (userId && selectedYear && selectedButton) {
+      dispatch(getYearlyPostData({
+        userId,
+        selectedButton,
+        year: selectedYear.value,
+      }));
+    }
+
+    //account transactions
+    if (!selectedItem.label) return; // If no month is selected, do not dispatch
+    dispatch(getFilteredPostData({
+      userId,
+      selectedButton,
+      month: selectedItem.label,
+      year: selectedYear.value
+    }));
+  }, [userId, selectedButton, selectedItem, selectedYear]);
+
+
+  // Group yearly post data by month -> for graph
+  const groupedData = Array(12).fill(0);
+
+  yearlyPostDatas.forEach(item => {
+    if (item.createdAt) {
+      const date = new Date(item.createdAt); // ✅ Date objesi
+      const monthIndex = date.getMonth(); // ✅ 0-11 arası ay
+      groupedData[monthIndex] += item.amount || 0;
+    }
+  });
+
+
+  const chartData = [
+    "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+    "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+  ].map((label, i) => ({
+    label,
+    value: groupedData[i]
+  }));
+
+  const selectedMonthData = chartData.find(item => item.label === selectedItem.label);
+
+
+  /*   runAI("Merhaba, nasılsın?").then(response => {
+      console.log("AI Response:", response);
+    }) */
 
   //VIEW
   return (
@@ -129,7 +196,15 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.upperInUpBar}>
 
             {/* Mounthly Amount */}
-            <TextView label={"21.203$"} textStyle={styles.amountMounthly} />
+            <TextView
+              label={
+                selectedMonthData
+                  ? `${selectedMonthData.value.toLocaleString("tr-TR")} ₺`
+                  : "-"
+              }
+              textStyle={styles.amountMounthly}
+            />
+
 
             {/* Years Dropdown */}
             <View>
@@ -147,7 +222,7 @@ const HomeScreen = ({ navigation }) => {
           {/* Date */}
           {!!selectedItem.label && (
             <View>
-              <TextView label={`${selectedItem.label} 2025`} textStyle={styles.dateText} />
+              <TextView label={`${selectedItem.label} ${selectedYear.value}`} textStyle={styles.dateText} />
             </View>
           )}
 
@@ -156,7 +231,7 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.graphCon}>
             <View style={{ flex: 1 }}>
               <CustomBarChart
-                data={data}
+                data={chartData}
                 onPressAction={(selected) => {
                   setSelectedItem(selected)
                 }}
@@ -172,16 +247,20 @@ const HomeScreen = ({ navigation }) => {
         {!!selectedItem.label && (
           <View style={styles.bottomCard}>
             <View style={{ marginBottom: 10 }}>
-              <TextView label={`${selectedItem.label} 2025 Hareketleri`} textStyle={titleTxt} />
+              <TextView label={`${selectedItem.label} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
             </View>
 
-            {years.map(item => (
+            {postDatas.map(item => (
               <View key={item.id} style={card}>
                 <AccountTransactionsRow
-                  title={[]}
-                  amount={30}
-                  date={selectedItem.label}
-                  type={selectedButton}
+                  title={item.description || "Açıklama Yok"}
+                  amount={item.amount || "0,00"}
+                  date={
+                    item.createdAt
+                      ? new Date(item.createdAt).toLocaleDateString('tr-TR')
+                      : "Tarih Yok"
+                  }
+                  type={item.category ? "Gider" : "Gelir"}
                 />
               </View>
             ))}

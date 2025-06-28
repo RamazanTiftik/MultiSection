@@ -85,7 +85,6 @@ const PostDataScreen = ({ navigation }) => {
 
 
   useEffect(() => {
-
     dispatch(getFilteredPostData({ userId, selectedButton, month: selectedMonth.value, year: selectedYear.value }))
   }, [userId, selectedButton, selectedMonth, selectedYear])
 
@@ -128,7 +127,7 @@ const PostDataScreen = ({ navigation }) => {
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const handleConfirm = (date) => {
-    setSelectedDate(date.toLocaleDateString())
+    setSelectedDate(date)
     hideDatePicker();
   };
 
@@ -200,8 +199,10 @@ const PostDataScreen = ({ navigation }) => {
           isMonthly: selectedChoose.value === "Yes" ? true : false,
           createdAt: selectedDate instanceof Date
             ? Timestamp.fromDate(selectedDate)
-            : Timestamp.now()
+            : Timestamp.fromDate(new Date(selectedDate))
+
         }))
+        console.log(selectedDate)
 
         // Reset input fields after adding income
         setDescription("");
@@ -340,7 +341,14 @@ const PostDataScreen = ({ navigation }) => {
                 <View style={styles.dateContainer}>
                   <TextView label={"Tarih:"} textStyle={text} />
                   <Pressable onPress={showDatePicker} style={styles.dateInput}>
-                    <TextView label={selectedDate || "Tarih Seçininiz"} textStyle={text} />
+                    <TextView
+                      label={
+                        selectedDate
+                          ? selectedDate.toLocaleDateString('tr-TR')
+                          : "Tarih Seçiniz"
+                      }
+                      textStyle={text}
+                    />
                   </Pressable>
 
                   <DateTimePickerModal
@@ -455,7 +463,14 @@ const PostDataScreen = ({ navigation }) => {
                 <View style={styles.dateContainer}>
                   <TextView label={"Tarih:"} textStyle={text} />
                   <Pressable onPress={showDatePicker} style={styles.dateInput}>
-                    <TextView label={selectedDate || "Tarih Seçininiz"} textStyle={text} />
+                    <TextView
+                      label={
+                        selectedDate
+                          ? selectedDate.toLocaleDateString('tr-TR')
+                          : "Tarih Seçiniz"
+                      }
+                      textStyle={text}
+                    />
                   </Pressable>
 
                   <DateTimePickerModal
@@ -463,8 +478,9 @@ const PostDataScreen = ({ navigation }) => {
                     mode="date"
                     onConfirm={handleConfirm}
                     onCancel={hideDatePicker}
-                    textColor="#000"
+                    textColor={theme === 'dark' ? '#fff' : '#000'}
                     themeVariant="light"
+                    display="spinner"
                   />
                 </View>
               </View>
