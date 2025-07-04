@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import CustomContainer from '../component/CustomContainer'
 import TextView from '../component/TextView'
@@ -11,44 +11,37 @@ import AccountTransactionsRow from '../component/FlatListRow/AccountTransactions
 import { runAI } from '../firebaseConfig/AI'
 import { useDispatch, useSelector } from 'react-redux'
 import { getFilteredPostData, getYearlyPostData } from '../redux/slices/HomePageSlice'
+import ModalContent from '../component/ModalContent'
 
 const HomeScreen = ({ navigation }) => {
 
   //button
   const [selectedButton, setSelectedButton] = useState("Gelir")
 
-  const data = [
-    { label: 'Ocak', value: 50 },
-    { label: 'Şubat', value: 70 },
-    { label: 'Mart', value: 90 },
-    { label: 'Nisan', value: 60 },
-    { label: 'Mayıs', value: 40 },
-    { label: 'Haziran', value: 100 },
-    { label: 'Temmuz', value: 30 },
-    { label: 'Ağustos', value: 20 },
-    { label: 'Eylül', value: 80 },
-    { label: 'Ekim', value: 45 },
-    { label: 'Kasım', value: 55 },
-    { label: 'Aralık', value: 75 },
-  ];
-
   //redux state
   const dispatch = useDispatch()
   const userId = useSelector((state) => state.auth.userId);
   const postDatas = useSelector((state) => state.homePage.filteredPostDatas);
   const yearlyPostDatas = useSelector((state) => state.homePage.yearlyPostDatas);
+  const incomeYearlyPostDatas = useSelector((state) => state.homePage.incomeYearlyPostDatas);
+  const expenseYearlyPostDatas = useSelector((state) => state.homePage.expenseYearlyPostDatas);
 
   //theme
   const secondaryColor = themes.colorTheme.secondary.color
   const tertiaryColor = themes.colorTheme.tertiary.color
-  const text = themes.textTheme.text
   const card = themes.card.cardView
   const titleTxt = themes.textTheme.titleTxt
-  const profileText = themes.textTheme.profileText
+
+  //local account transactions state
+  const [transactionsToShow, setTransactionsToShow] = useState([])
 
 
   //selectedColumn state from component
   const [selectedItem, setSelectedItem] = useState({})
+
+  //modal visible state
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
 
 
   //top bar buttons
@@ -87,37 +80,50 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
 
     //for graph data
-    if (userId && selectedYear && selectedButton) {
-      dispatch(getYearlyPostData({
-        userId,
-        selectedButton,
-        year: selectedYear.value,
-      }));
+    if (userId && selectedYear) {
+      dispatch(getYearlyPostData({ userId, selectedButton: "Gelir", year: selectedYear.value }))
+      dispatch(getYearlyPostData({ userId, selectedButton: "Gider", year: selectedYear.value }))
     }
 
     //account transactions
     if (!selectedItem.label) return; // If no month is selected, do not dispatch
-    dispatch(getFilteredPostData({
-      userId,
-      selectedButton,
-      month: selectedItem.label,
-      year: selectedYear.value
-    }));
+
+    else if (selectedButton === "Özet") {
+      dispatch(getYearlyPostData({ userId, year: selectedYear.value }));
+
+    } else {
+      dispatch(getFilteredPostData({
+        userId,
+        selectedButton,
+        month: selectedItem.label,
+        year: selectedYear.value
+      }));
+    }
+
   }, [userId, selectedButton, selectedItem, selectedYear]);
 
 
   // Group yearly post data by month -> for graph
   const groupedData = Array(12).fill(0);
 
-  yearlyPostDatas.forEach(item => {
-    if (item.createdAt) {
-      const date = new Date(item.createdAt); // ✅ Date objesi
-      const monthIndex = date.getMonth(); // ✅ 0-11 arası ay
-      groupedData[monthIndex] += item.amount || 0;
-    }
-  });
+  selectedButton === "Gelir"
+    ? incomeYearlyPostDatas.forEach(item => {
+      if (item.createdAt) {
+        const date = new Date(item.createdAt); // ✅ Date objesi
+        const monthIndex = date.getMonth(); // ✅ 0-11 arası ay
+        groupedData[monthIndex] += item.amount || 0;
+      }
+    })
+    : expenseYearlyPostDatas.forEach(item => {
+      if (item.createdAt) {
+        const date = new Date(item.createdAt); // ✅ Date objesi
+        const monthIndex = date.getMonth(); // ✅ 0-11 arası ay
+        groupedData[monthIndex] += item.amount || 0;
+      }
+    })
 
 
+  // Prepare chart data -> for graph
   const chartData = [
     "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
     "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
@@ -129,14 +135,104 @@ const HomeScreen = ({ navigation }) => {
   const selectedMonthData = chartData.find(item => item.label === selectedItem.label);
 
 
+  // Prepare summary chart data -> for summary graph
+  const summaryChartData = [
+    "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+    "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+  ].map((label, i) => {
+    const income = incomeYearlyPostDatas.reduce((acc, item) => {
+      const date = new Date(item.createdAt);
+      if (date.getMonth() === i) acc += item.amount || 0;
+      return acc;
+    }, 0);
+
+    const expense = expenseYearlyPostDatas.reduce((acc, item) => {
+      const date = new Date(item.createdAt);
+      if (date.getMonth() === i) acc += item.amount || 0;
+      return acc;
+    }, 0);
+
+    return {
+      label,
+      income,
+      expense
+    };
+  });
+
+  const selectedSummaryMonthData = summaryChartData.find(item => item.label === selectedItem.label);
+
+
   /*   runAI("Merhaba, nasılsın?").then(response => {
       console.log("AI Response:", response);
     }) */
 
+
+  // Prepare transactions to show based on selected button
+  useEffect(() => {
+    if (selectedButton === "Özet") {
+      if (!selectedItem.label) return;
+
+      const monthNameToNumber = {
+        "Ocak": 0, "Şubat": 1, "Mart": 2, "Nisan": 3, "Mayıs": 4, "Haziran": 5,
+        "Temmuz": 6, "Ağustos": 7, "Eylül": 8, "Ekim": 9, "Kasım": 10, "Aralık": 11
+      };
+
+      const selectedMonthIndex = monthNameToNumber[selectedItem.label];
+
+      const filtered = yearlyPostDatas.filter(item => {
+        const date = new Date(item.createdAt);
+        return (
+          date.getMonth() === selectedMonthIndex &&
+          date.getFullYear() === Number(selectedYear.value)
+        );
+      });
+
+      setTransactionsToShow(filtered);
+    } else {
+      setTransactionsToShow(postDatas);
+    }
+  }, [selectedButton, postDatas, yearlyPostDatas, selectedItem, selectedYear]);
+
+
+  // Modal AI Chat Handle
+  const modalAIChatHandle = () => {
+    console.log("modalAIChatHandle")
+  }
+
+  // Modal User Target Handle
+  const modalUserTargetHandle = () => {
+    navigation.navigate("ProfileStack", { screen: "Target Planner" });
+  }
+
+  // Modal AI Chat Handle
+  const modalAIChatHandle1 = () => {
+    console.log("modalAIChatHandle1")
+  }
+
+  // Modal AI Chat Handle
+  const modalAIChatHandle2 = () => {
+    console.log("modalAIChatHandle2")
+  }
+
+
+
   //VIEW
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
+
+      {/* Fab Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setIsModalVisible(true)}
+      >
+        <Image
+          source={require('../assets/click.jpg')}
+          style={styles.fabIcon}
+        />
+      </TouchableOpacity>
+
       <CustomContainer>
+
 
         {/* Up Bar Buttons */}
         <View style={styles.upBar}>
@@ -198,9 +294,13 @@ const HomeScreen = ({ navigation }) => {
             {/* Mounthly Amount */}
             <TextView
               label={
-                selectedMonthData
-                  ? `${selectedMonthData.value.toLocaleString("tr-TR")} ₺`
-                  : "-"
+                selectedButton === "Özet" && selectedSummaryMonthData
+                  ? `${(selectedSummaryMonthData.income - selectedSummaryMonthData.expense).toLocaleString("tr-TR", {
+                    signDisplay: "always",
+                  })} ₺`
+                  : selectedMonthData
+                    ? `${selectedMonthData.value.toLocaleString("tr-TR")} ₺`
+                    : "-"
               }
               textStyle={styles.amountMounthly}
             />
@@ -228,29 +328,101 @@ const HomeScreen = ({ navigation }) => {
 
 
           {/* Graph */}
-          <View style={styles.graphCon}>
-            <View style={{ flex: 1 }}>
-              <CustomBarChart
-                data={chartData}
-                onPressAction={(selected) => {
-                  setSelectedItem(selected)
-                }}
-                type={selectedButton}
-              />
+          {selectedButton === "Özet" ? (
+            <View style={styles.graphCon}>
+              <View style={{ flex: 1 }}>
+                <CustomBarChart
+                  data={summaryChartData}
+                  onPressAction={(selected) => {
+                    setSelectedItem(selected)
+                  }}
+                  type={selectedButton}
+                />
+              </View>
             </View>
-          </View>
+
+          ) : (
+            <View style={styles.graphCon}>
+              <View style={{ flex: 1 }}>
+                <CustomBarChart
+                  data={chartData}
+                  onPressAction={(selected) => {
+                    setSelectedItem(selected)
+                  }}
+                  type={selectedButton}
+                />
+              </View>
+            </View>
+          )}
 
         </View>
+
+
+        {/* Fab Button - Modal */}
+        {isModalVisible && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+
+              <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>Eklentiler</Text>
+
+              <View style={styles.modalGrid}>
+
+                {/* AI Chat */}
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={modalAIChatHandle}
+                >
+                  <ModalContent tabTitle={"AIAnaliz"} tabImage={require("./../assets/robot.jpg")} />
+                </TouchableOpacity>
+
+
+                {/* User Target */}
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={modalUserTargetHandle}
+                >
+                  <ModalContent tabTitle={"Hedeflerim"} tabImage={require("./../assets/target.jpg")} />
+                </TouchableOpacity>
+
+
+                {/* AI Chat */}
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={modalAIChatHandle}
+                >
+                  <ModalContent tabTitle={"AISor"} tabImage={require("./../assets/aiAsk.jpg")} />
+                </TouchableOpacity>
+
+
+                {/* Theme */}
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={modalAIChatHandle}
+                >
+                  <ModalContent tabTitle={"Tema"} tabImage={require("./../assets/colorTheme.jpg")} />
+                </TouchableOpacity>
+
+              </View>
+
+
+              <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.modalCloseBtn}>
+                <Text style={{ color: "#fff" }}>Kapat</Text>
+              </TouchableOpacity>
+
+            </View>
+          </View>
+        )}
 
 
         {/* Account Transactions */}
         {!!selectedItem.label && (
           <View style={styles.bottomCard}>
+
             <View style={{ marginBottom: 10 }}>
               <TextView label={`${selectedItem.label} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
             </View>
 
-            {postDatas.map(item => (
+            {transactionsToShow.map(item => (
               <View key={item.id} style={card}>
                 <AccountTransactionsRow
                   title={item.description || "Açıklama Yok"}
@@ -265,12 +437,13 @@ const HomeScreen = ({ navigation }) => {
               </View>
             ))}
 
+
           </View>
         )}
 
 
       </CustomContainer>
-    </SafeAreaView>
+    </SafeAreaView >
   )
 }
 
@@ -335,4 +508,79 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 600
   },
+  fab: {
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
+    width: 60,
+    height: 60,
+    backgroundColor: '#007AFF',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 99,
+    marginBottom: 100
+  },
+  fabText: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: 'bold'
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100
+  },
+  modalContent: {
+    width: '90%',
+    height: 550,
+    padding: 10,
+    backgroundColor: 'rgba(235, 228, 228, 1)',
+    borderRadius: 10,
+    alignItems: 'center',
+    borderRadius: 20
+  },
+  modalCloseBtn: {
+    marginTop: 20,
+    width: 120,
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalButton: {
+    backgroundColor: "gray",
+    width: "45%", // veya sabit: 140
+    height: 210,
+    margin: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+
+  },
+  modalGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  fabIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    resizeMode: 'cover',
+    opacity: 0.9
+  }
 })

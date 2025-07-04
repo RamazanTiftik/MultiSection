@@ -22,31 +22,73 @@ const getSeasonColor = (label) => {
 
 
 const CustomFlatBarChart = ({ data, onPressAction, type }) => {
+    const [selectedItem, setSelectedItem] = useState("");
 
-    const [bgColor, setBgColor] = useState('#ffffff');
-    const [selectedItem, setSelectedItem] = useState("")
-
-    const maxValue = Math.max(...data.map(item => item.value));
+    const maxValue = Math.max(...data.map(item => {
+        return type === "Özet"
+            ? Math.max(item.income || 0, item.expense || 0)
+            : item.value || 0;
+    }));
     const chartHeight = 200;
 
-
     const columnClickHandle = (item) => {
-        setSelectedItem(item)
-        onPressAction?.(item)
-    }
-
+        setSelectedItem(item);
+        onPressAction?.(item);
+    };
 
     return (
-        <View style={{ flex: 1, backgroundColor: bgColor, padding: 10 }}>
+        <View style={{ flex: 1, padding: 10, backgroundColor: "#ffffff" }}>
             <FlatList
                 horizontal
                 data={data}
                 keyExtractor={(item) => item.label}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => {
-                    const barHeight = (item.value / maxValue) * chartHeight / 1.03;
-                    const gradientColors = getSeasonColor(item.label);
                     const isSelected = selectedItem?.label === item.label;
+
+                    if (type === "Özet") {
+                        // Çift sütunlu görünüm: income ve expense
+                        const incomeHeight = (item.income / maxValue) * chartHeight;
+                        const expenseHeight = (item.expense / maxValue) * chartHeight;
+
+                        return (
+                            <TouchableOpacity
+                                onPress={() => columnClickHandle(item)}
+                                style={{ alignItems: 'center', marginHorizontal: 8 }}
+                            >
+                                <View style={{ height: chartHeight, flexDirection: "row", alignItems: 'flex-end' }}>
+                                    {/* Income bar */}
+                                    <View style={{
+                                        height: incomeHeight || 4,
+                                        width: 18,
+                                        backgroundColor: "#56ab2f",
+                                        marginHorizontal: 2,
+                                        borderTopLeftRadius: 4,
+                                        borderTopRightRadius: 4,
+                                        borderWidth: isSelected ? 2 : 0,
+                                        borderColor: isSelected ? "#0275d8" : "transparent"
+                                    }} />
+                                    {/* Expense bar */}
+                                    <View style={{
+                                        height: expenseHeight || 4,
+                                        width: 18,
+                                        backgroundColor: "#e74c3c",
+                                        marginHorizontal: 2,
+                                        borderTopLeftRadius: 4,
+                                        borderTopRightRadius: 4,
+                                        borderWidth: isSelected ? 2 : 0,
+                                        borderColor: isSelected ? "#0275d8" : "transparent"
+                                    }} />
+                                </View>
+                                <Text style={{ marginTop: 5, fontSize: 12 }}>{item.label}</Text>
+                            </TouchableOpacity>
+                        );
+                    }
+
+                    // Tek sütun: Gelir veya Gider
+                    const barHeight = (item.value / maxValue) * chartHeight;
+                    const gradientColors = getSeasonColor(item.label);
 
                     return (
                         <TouchableOpacity
@@ -67,7 +109,7 @@ const CustomFlatBarChart = ({ data, onPressAction, type }) => {
                                     style={{
                                         position: 'absolute',
                                         bottom: 0,
-                                        height: barHeight || 8,
+                                        height: barHeight || 3,
                                         width: 50,
                                         borderTopLeftRadius: 4,
                                         borderTopRightRadius: 4,
@@ -85,12 +127,11 @@ const CustomFlatBarChart = ({ data, onPressAction, type }) => {
                         </TouchableOpacity>
                     );
                 }}
-
-                showsHorizontalScrollIndicator={false}
             />
         </View>
     );
 };
+
 
 export default CustomFlatBarChart;
 

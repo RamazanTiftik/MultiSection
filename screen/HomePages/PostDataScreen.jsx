@@ -12,7 +12,7 @@ import Input from '../../component/Input'
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AccountTransactionsRow from '../../component/FlatListRow/AccountTransactionsRow'
 import { useDispatch, useSelector } from 'react-redux'
-import { getAllBankNames, getAllCategories, savePostData } from '../../redux/slices/PostDataSlice'
+import { getAllBankNames, getAllCategories, postDataUserData, savePostData } from '../../redux/slices/PostDataSlice'
 import { Timestamp } from 'firebase/firestore'
 import { getFilteredPostData } from '../../redux/slices/HomePageSlice'
 
@@ -36,10 +36,6 @@ const PostDataScreen = ({ navigation }) => {
     { id: 7, value: "Temmuz" }, { id: 8, value: "Ağustos" }, { id: 9, value: "Eylül" },
     { id: 10, value: "Ekim" }, { id: 11, value: "Kasım" }, { id: 12, value: "Aralık" }
   ]
-  const years = [
-    { id: 1, value: "2023" }, { id: 2, value: "2024" },
-    { id: 3, value: "2025" }, { id: 4, value: "2026" }
-  ]
   const yesOrNo = [
     { id: 1, value: "No" }, { id: 2, value: "Yes" }
   ]
@@ -53,7 +49,6 @@ const PostDataScreen = ({ navigation }) => {
 
   //datas local state
   const [selectedMonth, setSelectedMonth] = useState(months[5])
-  const [selectedYear, setSelectedYear] = useState(years[3])
   const [selectedBank, setSelectedBank] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedChoose, setSelectedChoose] = useState(yesOrNo[0])
@@ -132,6 +127,24 @@ const PostDataScreen = ({ navigation }) => {
   };
 
 
+  // Function to generate years dynamically
+  const generateYears = (range = 3) => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+
+    for (let i = -range; i <= range; i++) {
+      years.push({ id: currentYear + i, value: String(currentYear + i) });
+    }
+
+    return years;
+  };
+
+  const [years] = useState(generateYears());
+  const [selectedYear, setSelectedYear] = useState(
+    years.find(item => item.value === String(new Date().getFullYear()))
+  );
+
+
   //parse currency from formatted string
   const parseCurrencyTR = (formatted) => {
     if (!formatted) return 0;
@@ -170,6 +183,13 @@ const PostDataScreen = ({ navigation }) => {
             : Timestamp.now()
         }))
 
+        //save user data to redux
+        dispatch(postDataUserData({
+          userId: userId,
+          selectedButton: selectedButton,
+          amount: parseFloat(numericValueAmount),
+        }))
+
         // Reset input fields after adding income
         setDescription("");
         setAmount("");
@@ -202,7 +222,13 @@ const PostDataScreen = ({ navigation }) => {
             : Timestamp.fromDate(new Date(selectedDate))
 
         }))
-        console.log(selectedDate)
+
+        //save user data to redux
+        dispatch(postDataUserData({
+          userId: userId,
+          selectedButton: selectedButton,
+          amount: parseFloat(numericValueAmount),
+        }))
 
         // Reset input fields after adding income
         setDescription("");

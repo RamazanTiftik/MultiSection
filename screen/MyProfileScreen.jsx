@@ -39,6 +39,8 @@ const MyProfileScreen = ({ navigation }) => {
   //user data state
   const [userEmail, setUserEmail] = useState("")
   const [userSalary, setUserSalary] = useState(0.0)
+  const [userTotalExpense, setUserTotalExpense] = useState(0.0)
+  const [userTotalSalary, setUserTotalSalary] = useState(0.0)
   const [userExpense, setUserExpense] = useState(0.0)
   const [userName, setUserName] = useState("")
   const userSaving = parseFloat((userSalary - userExpense).toFixed(2));
@@ -92,6 +94,8 @@ const MyProfileScreen = ({ navigation }) => {
         setUserName(userData.name)
         setUserSalary(userData.salary)
         setUserExpense(userData.expense)
+        setUserTotalExpense(userData.totalExpense)
+        setUserTotalSalary(userData.totalIncome)
         return userData;
 
       } else {
@@ -204,7 +208,7 @@ const MyProfileScreen = ({ navigation }) => {
 
   //popup close handle
   const popupCloseHandle = () => {
-    
+
     //error popup close handle
     setErrorAlertMessage("")
     setShowErrorAlert(false)
@@ -272,7 +276,7 @@ const MyProfileScreen = ({ navigation }) => {
               <View style={styles.amountTxtCon}>
                 <View style={[styles.amountItem, { borderRightWidth: 2, borderRightColor: "#ddd" }]}>
                   <TextView label={`${userSalary} ₺`} textStyle={profileText} />
-                  <TextView label={"Maaş"} textStyle={text} />
+                  <TextView label={"Gelir"} textStyle={text} />
                 </View>
                 <View style={styles.amountItem}>
                   <TextView label={`${userExpense} ₺`} textStyle={profileText} />

@@ -63,7 +63,7 @@ export const savePostData = createAsyncThunk(
     'postData/savePostData',
     async ({ userId, selectedButton, amount, description, bankName, createdAt, isMonthly, category }, thunkAPI) => {
         try {
-            
+
             const postDataId = uuidv4(); // random id for postData
             let postDataRef = ""
 
@@ -104,6 +104,49 @@ export const savePostData = createAsyncThunk(
         }
     }
 );
+
+
+// update user data by id (add to existing salary and expense)
+export const postDataUserData = createAsyncThunk(
+    'userInfo/updateUserDataById',
+    async ({ userId, selectedButton, amount, }, thunkAPI) => {
+        try {
+            const userRef = doc(db, "users", userId);
+
+            // Önce mevcut verileri al
+            const userSnap = await getDoc(userRef);
+
+            let currentData = userSnap.exists() ? userSnap.data() : {};
+            let newIncome = 0
+            let newExpense = 0
+
+            if (selectedButton === "Gelir") {
+                newIncome = (currentData.salary || 0) + (amount || 0);
+                newExpense = currentData.expense || 0; // gider değişmez
+
+            } else if (selectedButton === "Gider") {
+                newExpense = (currentData.expense || 0) + (amount || 0);
+                newIncome = currentData.salary || 0; // gelir değişmez
+            }
+
+            // GÜNCEL verileri kaydet
+            await setDoc(userRef, {
+                totalIncome: newIncome,
+                totalExpense: newExpense,
+            }, { merge: true });
+
+            return {
+                userId,
+                totalIncome: newIncome,
+                totalExpense: newExpense,
+            };
+        } catch (error) {
+            console.error("Firestore Error:", error);
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+);
+
 
 
 

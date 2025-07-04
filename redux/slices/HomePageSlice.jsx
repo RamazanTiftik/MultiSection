@@ -80,28 +80,44 @@ export const getFilteredPostData = createAsyncThunk(
 // Get yearly post data based on userId, selectedButton, and year -> for group up by month
 export const getYearlyPostData = createAsyncThunk(
     'homePage/getYearlyPostData',
-    async ({ userId, selectedButton, year }, thunkAPI) => {
+    async ({ userId, selectedButton = null, year }, thunkAPI) => {
         try {
-            const collectionName = selectedButton === "Gelir" ? "Income" : "Expense";
-            const ref = collection(db, "users", userId, collectionName);
-
             const start = Timestamp.fromDate(new Date(`${year}-01-01`));
             const end = Timestamp.fromDate(new Date(`${parseInt(year) + 1}-01-01`));
 
-            const q = query(ref, where("createdAt", ">=", start), where("createdAt", "<", end));
-            const snapshot = await getDocs(q);
+            const getData = async (type) => {
+                const collectionName = type === "Gelir" ? "Income" : "Expense";
+                const ref = collection(db, "users", userId, collectionName);
+                const q = query(ref, where("createdAt", ">=", start), where("createdAt", "<", end));
+                const snapshot = await getDocs(q);
 
-            const posts = snapshot.docs.map(doc => {
-                const data = doc.data();
+                return snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        ...data,
+                        createdAt: data.createdAt?.toDate().toISOString() ?? null
+                    };
+                });
+            };
 
-                return {
-                    ...data,
-                    createdAt: data.createdAt?.toDate().toISOString() ?? null
-                };
-            });
+            // Tek tip istenirse
+            if (selectedButton === "Gelir" || selectedButton === "Gider") {
+                const posts = await getData(selectedButton);
+                return { type: selectedButton, posts };
+            }
 
-            return posts;
+            // Hem gelir hem gider istenirse
+            const [incomePosts, expensePosts] = await Promise.all([
+                getData("Gelir"),
+                getData("Gider")
+            ]);
 
+            return {
+                type: "Hepsi",
+                incomePosts,
+                expensePosts,
+                all: [...incomePosts, ...expensePosts],
+            };
 
         } catch (error) {
             console.error("Yıl verisi alınamadı:", error);
@@ -111,6 +127,8 @@ export const getYearlyPostData = createAsyncThunk(
 );
 
 
+
+
 const homePageSlice = createSlice({
     name: 'homePage',
     initialState: {
@@ -118,6 +136,8 @@ const homePageSlice = createSlice({
         error: null,
         filteredPostDatas: [],
         yearlyPostDatas: [],
+        incomeYearlyPostDatas: [],
+        expenseYearlyPostDatas: [],
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -137,14 +157,25 @@ const homePageSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // Get yearly post data
+            // Get yearly post data (income / expense / both)
             .addCase(getYearlyPostData.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(getYearlyPostData.fulfilled, (state, action) => {
                 state.loading = false;
-                state.yearlyPostDatas = action.payload;
+                const { type } = action.payload;
+
+                if (type === "Gelir") {
+                    state.incomeYearlyPostDatas = action.payload.posts;
+                } else if (type === "Gider") {
+                    state.expenseYearlyPostDatas = action.payload.posts;
+                } else if (type === "Hepsi") {
+                    state.incomeYearlyPostDatas = action.payload.incomePosts;
+                    state.expenseYearlyPostDatas = action.payload.expensePosts;
+                }
+
+                state.yearlyPostDatas = [...state.incomeYearlyPostDatas, ...state.expenseYearlyPostDatas];
             })
             .addCase(getYearlyPostData.rejected, (state, action) => {
                 state.loading = false;
