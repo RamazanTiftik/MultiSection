@@ -42,7 +42,6 @@ const FeedBackScreen = ({ navigation }) => {
   const [showPopup, setShowPopup] = useState(false)
 
 
-
   //Back Button Func
   const backAction = () => {
     navigation.reset({

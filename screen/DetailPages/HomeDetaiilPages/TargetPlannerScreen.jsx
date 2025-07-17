@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,7 +8,14 @@ import {
     FlatList,
     ScrollView,
     SafeAreaView,
+    BackHandler,
 } from 'react-native';
+import CustomIcons from '../../../component/CustomIcons';
+import { themes } from '../../../theme/Themes';
+import CustomPopup from '../../../component/CustomPopup';
+import { useDispatch, useSelector } from 'react-redux';
+import { saveTargetPlan } from '../../../redux/slices/pluginSlice/TargetPlannerSlice';
+
 
 const plans = [
     {
@@ -37,14 +44,76 @@ const plans = [
     },
 ];
 
-const TargetPlannerScreen = () => {
+
+const TargetPlannerScreen = ({ navigation }) => {
+
+    //theme
+    const secondaryColor = themes.colorTheme.secondary.color
+    const card = themes.card.cardView
+    const text = themes.textTheme.text
+
+    //redux
+    const dispatch = useDispatch();
+    const userId = useSelector((state) => state.auth.userId);
+
+    //loading state
+    const [loading, setLoading] = useState(false)
+
+    //local state variables
     const [goalName, setGoalName] = useState('');
     const [goalAmount, setGoalAmount] = useState('');
     const [monthlySave, setMonthlySave] = useState('');
-    const [downpaymentPercent, setDownpaymentPercent] = useState('20'); // varsayılan %20 peşinat
+    const [downpaymentPercent, setDownpaymentPercent] = useState('');
     const [targetDate, setTargetDate] = useState(''); // yyyy-mm formatında girilecek
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [planResult, setPlanResult] = useState([]);
+
+    //popup alert visible
+    const [showPopup, setShowPopup] = useState(false)
+    const [popupMessage, setPopupMessage] = useState("")
+    const [popupType, setpopupType] = useState("")
+
+
+    //Back Button Func
+    const backAction = () => {
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "Target Planner List" }]
+        });
+        return true;
+    };
+
+    //back button listener
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
+        return () => backHandler.remove()
+    }, [])
+
+    //Back Button and Header Options
+    useEffect(() => {
+        navigation.setOptions({
+            headerShown: true,
+            headerTitleStyle: {
+                color: "#007AFF",
+                fontSize: 18,
+                backgroundColor: "red"
+            },
+            headerTitle: "Hedef Planlama",
+            headerLeft: () => (
+                <TouchableOpacity onPress={() => backAction()}>
+                    <CustomIcons icon={"Back"} />
+                </TouchableOpacity>
+            ),
+            headerStyle: {
+                backgroundColor: secondaryColor,
+            },
+        });
+    }, [navigation]);
+
 
     // Aylar farkı hesapla (yyyy-mm format)
     const getMonthsDiff = (target) => {
@@ -58,11 +127,31 @@ const TargetPlannerScreen = () => {
         return diff > 0 ? diff : 0;
     };
 
+
+    //handle plan selection
     const handlePlanSelection = (planType) => {
         setSelectedPlan(planType);
-        setPlanResult([]); // Önceki sonucu temizle
+        setPlanResult([]); //clear previous results
     };
 
+
+    //after popup closed
+    const navigateHandle = () => {
+        setGoalAmount('')
+        setGoalName('')
+        setMonthlySave('')
+        setDownpaymentPercent('')
+        setTargetDate('')
+        setSelectedPlan(null)
+        setPlanResult([])
+        setShowPopup(false)
+
+        //navigate to list screen
+        navigation.navigate("Target Planner List")
+    }
+
+
+    //calculate plan based on selected type
     const calculatePlan = (planType) => {
         const amount = parseFloat(goalAmount);
         const monthly = parseFloat(monthlySave);
@@ -77,6 +166,8 @@ const TargetPlannerScreen = () => {
         let newPlan = [];
 
         switch (planType) {
+
+            // Sabit Aylık Ödeme Planı
             case 'fixed':
                 if (!monthly || monthly <= 0) {
                     setPlanResult([]);
@@ -92,6 +183,7 @@ const TargetPlannerScreen = () => {
                 }
                 break;
 
+            // Artan Ödeme Planı
             case 'increasing':
                 if (!monthly || monthly <= 0) {
                     setPlanResult([]);
@@ -116,13 +208,14 @@ const TargetPlannerScreen = () => {
                 }
                 break;
 
+            // Peşinat + Taksit Planı
             case 'downpayment':
-                if (!downpayment || downpayment <= 0 || downpayment >= 100) {
+                if (!downpayment || downpayment <= 0) {
                     setPlanResult([]);
                     return;
                 }
                 {
-                    const pesinat = (amount * downpayment) / 100;
+                    const pesinat = downpayment;
                     const kalan = amount - pesinat;
                     if (!monthly || monthly <= 0) {
                         setPlanResult([]);
@@ -139,6 +232,7 @@ const TargetPlannerScreen = () => {
                 }
                 break;
 
+            // Tarih Bazlı Plan
             case 'dateBased':
                 if (!targetDate || monthsToTarget <= 0) {
                     setPlanResult([]);
@@ -163,32 +257,51 @@ const TargetPlannerScreen = () => {
 
     const handleCalculate = () => {
         if (!selectedPlan) {
-            alert('Lütfen bir plan seçin.');
+            setPopupMessage('Lütfen bir plan seçin.');
+            setpopupType('error');
+            setShowPopup(true);
             return;
+
+        } else if (!goalName || !goalAmount || (selectedPlan !== 'dateBased' && !monthlySave) || (selectedPlan === 'downpayment' && !downpaymentPercent)) {
+            setPopupMessage('Lütfen tüm bilgileri doldurun.');
+            setpopupType('error');
+            setShowPopup(true);
+            return;
+
+        } else {
+            //calculate the plan
+            calculatePlan(selectedPlan);
         }
-        calculatePlan(selectedPlan);
-    };
+    }
 
     const handleSave = () => {
-        if (!goalName || !goalAmount || !selectedPlan || planResult.length === 0) {
-            alert('Lütfen tüm bilgileri doldurun ve bir plan seçin.');
+        if (!selectedPlan) {
+            setPopupMessage('Lütfen bir plan seçin.');
+            setpopupType('error');
+            setShowPopup(true);
             return;
+
+        } else if (!goalName || !goalAmount || (selectedPlan !== 'dateBased' && !monthlySave) || (selectedPlan === 'downpayment' && !downpaymentPercent)) {
+            setPopupMessage('Lütfen tüm bilgileri doldurun.');
+            setpopupType('error');
+            setShowPopup(true);
+            return;
+
+        } else {
+            const isSaved = dispatch(saveTargetPlan({ userId, selectedPlan, goalName, goalAmount, selectedPlan, planResult, monthlySave, targetDate, downpaymentPercent }));
+
+            if (isSaved) {
+                setPopupMessage('Hedefiniz başarıyla kaydedilmiştir.');
+                setpopupType('success');
+                setShowPopup(true);
+            }
         }
-
-        const savedData = {
-            hedef: goalName,
-            tutar: goalAmount,
-            planTuru: selectedPlan,
-            aylikPlan: planResult,
-        };
-
-        console.log('✅ Kaydedilen Plan:', savedData);
-        alert('Plan başarıyla kaydedildi!');
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: secondaryColor }]}>
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+
                 <Text style={styles.title}>🎯 Hedef Planlayıcı</Text>
 
                 <TextInput
@@ -206,6 +319,7 @@ const TargetPlannerScreen = () => {
                     onChangeText={setGoalAmount}
                 />
 
+
                 {/* Sabit ve Artan ödeme planları için aylık tasarruf */}
                 {(selectedPlan === 'fixed' || selectedPlan === 'increasing' || selectedPlan === 'downpayment') && (
                     <TextInput
@@ -217,16 +331,18 @@ const TargetPlannerScreen = () => {
                     />
                 )}
 
-                {/* Peşinat planı için peşinat yüzdesi */}
+
+                {/* Peşinat planı için peşinat miktarı */}
                 {selectedPlan === 'downpayment' && (
                     <TextInput
-                        placeholder="Peşinat Yüzdesi (%)"
+                        placeholder="Peşinat Miktarı (₺)"
                         style={styles.input}
                         keyboardType="numeric"
                         value={downpaymentPercent}
                         onChangeText={setDownpaymentPercent}
                     />
                 )}
+
 
                 {/* Tarih bazlı plan için hedef tarih */}
                 {selectedPlan === 'dateBased' && (
@@ -238,8 +354,10 @@ const TargetPlannerScreen = () => {
                     />
                 )}
 
+
                 <Text style={styles.subtitle}>🧮 Bir Plan Seç</Text>
 
+                {/* Plans */}
                 <FlatList
                     data={plans}
                     keyExtractor={(item) => item.id}
@@ -260,11 +378,14 @@ const TargetPlannerScreen = () => {
                     )}
                 />
 
-                {/* Hesapla Butonu */}
+
+                {/* Calculate Button */}
                 <TouchableOpacity style={styles.calculateButton} onPress={handleCalculate}>
                     <Text style={styles.buttonText}>Hesapla</Text>
                 </TouchableOpacity>
 
+
+                {/* Target Plan Results */}
                 {planResult.length > 0 && (
                     <View style={styles.planContainer}>
                         <Text style={styles.planTitle}>📅 Aylık Plan ({goalName})</Text>
@@ -277,20 +398,34 @@ const TargetPlannerScreen = () => {
                     </View>
                 )}
 
+
+                {/* Save Button */}
                 <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                     <Text style={styles.buttonText}>Kaydet</Text>
                 </TouchableOpacity>
+
+
+                {/* Custom Popup */}
+                <CustomPopup
+                    visible={showPopup}
+                    message={popupMessage}
+                    onClose={navigateHandle}
+                    type={popupType}
+                />
+
+
             </ScrollView>
         </SafeAreaView>
     );
 };
+
 
 export default TargetPlannerScreen;
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#E6F0FF',
+        backgroundColor: '#fff',
     },
     container: {
         padding: 16,

@@ -201,7 +201,7 @@ const HomeScreen = ({ navigation }) => {
 
   // Modal User Target Handle
   const modalUserTargetHandle = () => {
-    navigation.navigate("ProfileStack", { screen: "Target Planner" });
+    navigation.navigate("Target Planner List");
   }
 
   // Modal AI Chat Handle

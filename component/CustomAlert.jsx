@@ -13,7 +13,8 @@ const CustomAlert = ({
     onConfirm,
     onCancel,
     confirmText = "Evet",
-    cancelText = "Hayır"
+    cancelText = "Hayır",
+    isDelete
 }) => {
     return (
         <Modal transparent animationType="fade" visible={visible}>
@@ -23,7 +24,7 @@ const CustomAlert = ({
 
                     <View style={styles.buttonRow}>
                         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onCancel}>
-                            <Text style={styles.cancelText}>{cancelText}</Text>
+                            <Text style={styles.cancelText}>{isDelete || cancelText}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={onConfirm}>
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     alertContainer: {
         width: 300,
         padding: 20,
-        backgroundColor: "#F28B82", 
+        backgroundColor: "#F28B82",
         borderRadius: 10,
         alignItems: "center"
     },

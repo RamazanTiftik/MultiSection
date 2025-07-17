@@ -6,6 +6,7 @@ import userNoteReducer from "./slices/UserNoteSlice"
 import feedbackReducer from "./slices/FeedbackSlice";
 import postDataReducer from "./slices/PostDataSlice";
 import homePageReducer from "./slices/HomePageSlice";
+import targetPlannerReducer from "./slices/pluginSlice/TargetPlannerSlice";
 
 
 export const store = configureStore({
@@ -17,5 +18,6 @@ export const store = configureStore({
     feedback: feedbackReducer,
     postData: postDataReducer,
     homePage: homePageReducer, 
+    targetPlanner: targetPlannerReducer
   },
 });

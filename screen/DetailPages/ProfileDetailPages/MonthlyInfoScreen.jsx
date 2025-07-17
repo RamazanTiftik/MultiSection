@@ -41,9 +41,6 @@ const MonthlyInfoScreen = ({ navigation }) => {
   //loading state
   const [loading, setLoading] = useState(false)
 
-  //alert visible state
-  const [showAlert, setShowAlert] = useState(false)
-
 
   //Back Button Func
   const backAction = () => {

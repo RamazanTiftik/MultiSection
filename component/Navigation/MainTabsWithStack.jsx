@@ -13,6 +13,8 @@ import UserNoteScreen from '../../screen/DetailPages/ProfileDetailPages/UserNote
 import NotificationScreen from '../../screen/DetailPages/ProfileDetailPages/NotificationScreen';
 import SingleUserNoteScreen from '../../screen/DetailPages/UserNoteDetailPages/SingleUserNoteScreen';
 import TargetPlannerScreen from '../../screen/DetailPages/HomeDetaiilPages/TargetPlannerScreen';
+import TargetPlannerListScreen from '../../screen/DetailPages/HomeDetaiilPages/TargetPlanListScreen';
+import TargetPlanDetail from '../../screen/DetailPages/HomeDetaiilPages/TargetPlanDetail';
 
 
 const Tab = createBottomTabNavigator();
@@ -29,10 +31,23 @@ function ProfileStack() {
             <Stack.Screen name="User Note" component={UserNoteScreen} />
             <Stack.Screen name="Mouthly Info" component={MonthlyInfoScreen} />
             <Stack.Screen name="User Note Detail" component={SingleUserNoteScreen} />
-            <Stack.Screen name="Target Planner" component={TargetPlannerScreen} />
         </Stack.Navigator>
     );
 }
+
+
+// Home Screen Stack
+function HomeStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Target Planner" component={TargetPlannerScreen} />
+            <Stack.Screen name="Target Planner List" component={TargetPlannerListScreen} />
+            <Stack.Screen name="Target Planner Detail" component={TargetPlanDetail} />
+        </Stack.Navigator>
+    );
+}
+
 
 // Ana Tab Yapısı
 export default function MainTabs() {
@@ -54,8 +69,8 @@ export default function MainTabs() {
             }}
         >
             <Tab.Screen
-                name="Home"
-                component={HomeScreen}
+                name="HomeStack"
+                component={HomeStack}
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <Ionicons name="home" size={focused ? 30 : 24} color={focused ? '#007AFF' : 'gray'} />
