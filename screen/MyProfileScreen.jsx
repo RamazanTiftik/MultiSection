@@ -1,0 +1,500 @@
+import { LinearGradient } from 'expo-linear-gradient'
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { themes } from '../theme/Themes'
+import CustomContainer from '../component/CustomContainer'
+import CustomIcons from '../component/CustomIcons'
+import TextView from '../component/TextView'
+import Input from '../component/Input'
+import { auth } from '../firebaseConfig/Firebase';
+import { db } from '../firebaseConfig/Firebase';
+import { useDispatch, useSelector } from 'react-redux';
+import { changePassword, logoutHandle } from '../redux/slices/AuthSlice'
+import CustomAlert from '../component/CustomAlert'
+import { doc, getDoc } from "firebase/firestore";
+import CustomPopup from '../component/CustomPopup'
+
+
+const MyProfileScreen = ({ navigation }) => {
+
+  //theme
+  const secondaryColor = themes.colorTheme.secondary.color
+  const tertiaryColor = themes.colorTheme.tertiary.color
+  const text = themes.textTheme.text
+  const card = themes.card.cardView
+  const titleTxt = themes.textTheme.titleTxt
+  const profileText = themes.textTheme.profileText
+
+  //change password states
+  const [oldPassword, setOldPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+
+  //input error state
+  const [hasOldPasswordError, setHasOldPasswordError] = useState(false);
+  const [hasPasswordError, setHasPasswordError] = useState(false);
+  const [hasConfirmPasswordError, setHasConfirmPasswordError] = useState(false);
+
+  //user data state
+  const [userEmail, setUserEmail] = useState("")
+  const [userSalary, setUserSalary] = useState(0.0)
+  const [userTotalExpense, setUserTotalExpense] = useState(0.0)
+  const [userTotalSalary, setUserTotalSalary] = useState(0.0)
+  const [userExpense, setUserExpense] = useState(0.0)
+  const [userName, setUserName] = useState("")
+  const userSaving = parseFloat((userSalary - userExpense).toFixed(2));
+
+  //redux
+  const dispatch = useDispatch()
+  //theme - redux
+  const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
+  const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+  //alert visible state
+  const [showAlert, setShowAlert] = useState(false)
+  const [showErrorAlert, setShowErrorAlert] = useState(false)
+  const [errorAlertMessage, setErrorAlertMessage] = useState("")
+  const [showChangePasswordPopup, setShowChangePasswordPopup] = useState(false)
+  const [showChangePasswordPopupMessage, setShowChangePasswordPopupMessage] = useState("")
+
+  //loading state
+  const [loading, setLoading] = useState(false)
+
+
+  useEffect(() => {
+    setLoading(true)
+    //when screen is focused, clear inputs
+    setOldPassword("")
+    setConfirmPassword("")
+    setNewPassword("")
+
+    //gel user data from firestore func
+    const fetchData = async () => {
+      setLoading(true);
+      await getUserData();
+      setLoading(false);
+    };
+    fetchData();
+  }, [])
+
+
+  //get user data from firestore
+  async function getUserData() {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        return;
+      }
+
+      const docRef = doc(db, "users", user.uid); // UID ile dokümanı çek
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        //users data
+        const userData = docSnap.data();
+        setUserEmail(userData.email)
+        setUserName(userData.name)
+        setUserSalary(userData.salary)
+        setUserExpense(userData.expense)
+        setUserTotalExpense(userData.totalExpense)
+        setUserTotalSalary(userData.totalIncome)
+        return userData;
+
+      } else {
+        //user not found
+      }
+    } catch (error) {
+      //handle any errors
+    }
+  }
+
+
+
+  //note button handle
+  const noteClickHandle = () => {
+    navigation.navigate('ProfileStack', {
+      screen: 'User Note',
+    });
+  }
+
+  //monthly info button handle
+  const monthlyClickHandle = () => {
+    navigation.navigate('ProfileStack', {
+      screen: 'Mouthly Info',
+    });
+  }
+
+  //notificaiton button handle
+  const notificationClickHandle = () => {
+    navigation.navigate('ProfileStack', {
+      screen: 'Notification',
+    });
+  }
+
+  //feedback button handle
+  const feedbackClickHandle = () => {
+    navigation.navigate('ProfileStack', {
+      screen: 'FeedBack',
+    });
+  }
+
+  //logout button handle
+  const logoutClickHandle = async () => {
+    try {
+      dispatch(logoutHandle())
+
+    } catch (error) {
+      console.log("Çıkış hatası:", error.message);
+    }
+  }
+
+  const logoutAlert = () => {
+    setShowAlert(true)
+  }
+
+
+  //change password input update handle
+  const changePasswordHandle = async () => {
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      if (!oldPassword) {
+        setHasOldPasswordError(true)
+      } else if (!newPassword) {
+        setHasPasswordError(true)
+      } else if (!confirmPassword) {
+        setHasConfirmPasswordError(true)
+      }
+
+    } else {
+      if (newPassword !== confirmPassword) {
+        setErrorAlertMessage("Yeni şifreler eşleşmiyor.");
+        setShowErrorAlert(true);
+        return;
+      }
+      if (newPassword.length < 6) {
+        setErrorAlertMessage("Yeni şifre en az 6 karakter olmalıdır.");
+        setShowErrorAlert(true);
+        return;
+      }
+      if (oldPassword === newPassword) {
+        setErrorAlertMessage("Yeni şifre eski şifre ile aynı olamaz.");
+        setShowErrorAlert(true);
+        return;
+      }
+
+      // Dispatch the change password action
+      setLoading(true);
+      const resultAction = await dispatch(changePassword({ oldPassword, newPassword }));
+      setLoading(false);
+
+      if (changePassword.fulfilled.match(resultAction)) {
+
+        //change password success
+        setShowChangePasswordPopupMessage("Şifreniz başarıyla değiştirildi.");
+        setShowChangePasswordPopup(true);
+
+        // Clear the input fields
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+
+      } else {
+        //change password error
+        const errorMsg = resultAction.payload || "Şifre değiştirilemedi.";
+        setErrorAlertMessage(errorMsg);
+        setShowErrorAlert(true);
+      }
+    }
+  }
+
+
+  //popup close handle
+  const popupCloseHandle = () => {
+
+    //error popup close handle
+    setErrorAlertMessage("")
+    setShowErrorAlert(false)
+
+    //change password popup close handle
+    if (showChangePasswordPopup) {
+      // If the change password popup was closed, reset the password fields
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowChangePasswordPopupMessage("")
+    }
+    setShowChangePasswordPopup(false);
+  }
+
+
+  //update input values
+  function updateInput(inputType, enteredValue) {
+    switch (inputType) {
+      case 'oldPassword':
+        setOldPassword(enteredValue);
+        if (enteredValue.trim() !== "") setHasOldPasswordError(false);
+        break;
+
+      case 'newPassword':
+        setNewPassword(enteredValue);
+        if (enteredValue.trim() !== "") setHasPasswordError(false);
+        break;
+
+      case 'confirmPassword':
+        setConfirmPassword(enteredValue);
+        if (enteredValue.trim() !== "") setHasConfirmPasswordError(false);
+        break;
+    }
+  }
+
+
+  //VIEW
+  if (loading) {
+    <View>
+      <Text>Yüklenioy</Text>
+    </View>
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
+        <CustomContainer>
+
+          {/* Profile Main Card */}
+          <View style={[card, { alignItems: "center", marginTop: 15 }]}>
+
+            {/* Icon */}
+            <View style={styles.iconCon}>
+              <CustomIcons icon={"Username"} color={theme.userIcon} />
+            </View>
+
+            {/* User Infos */}
+            <View style={styles.titleTxtCon}>
+              <TextView label={userName} textStyle={text} />
+              <TextView label={userEmail} textStyle={text} />
+            </View>
+
+            {/* Amount Infos */}
+            <View style={styles.bottomCon}>
+              <TextView label={"Düzenli (Aylık)"} textStyle={text} />
+              <View style={styles.amountTxtCon}>
+                <View style={[styles.amountItem, { borderRightWidth: 2, borderRightColor: "#ddd" }]}>
+                  <TextView label={`${userSalary} ₺`} textStyle={[profileText, { color: theme.text || "#007AFF" }]} />
+                  <TextView label={"Gelir"} textStyle={text} />
+                </View>
+                <View style={styles.amountItem}>
+                  <TextView label={`${userExpense} ₺`} textStyle={[profileText, { color: theme.text || "#007AFF" }]} />
+                  <TextView label={"Gider"} textStyle={text} />
+                </View>
+                <View style={[styles.amountItem, { borderLeftColor: "#ddd", borderLeftWidth: 2 }]}>
+                  <TextView label={`${userSaving} ₺`} textStyle={[profileText, { color: theme.text || "#007AFF" }]} />
+                  <TextView label={"Kalan"} textStyle={text} />
+                </View>
+              </View>
+            </View>
+
+          </View>
+
+
+          {/* Bottom Card (Options) */}
+          <View style={styles.bottomCard}>
+
+            {/* Monthly Info Change */}
+            <TouchableOpacity
+              onPress={monthlyClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Kullanıcı Bilgilerimi Düzenle"} textStyle={text} />
+            </TouchableOpacity>
+
+            {/* User Note */}
+            <TouchableOpacity
+              onPress={noteClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Kişisel Notlarım"} textStyle={text} />
+            </TouchableOpacity>
+
+            {/* Notifications */}
+            <TouchableOpacity
+              onPress={notificationClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Bildirim Ayarları"} textStyle={text} />
+            </TouchableOpacity>
+
+            {/* Feedback */}
+            <TouchableOpacity
+              onPress={feedbackClickHandle}
+              style={[card, { width: "100%", height: 60, justifyContent: "center" }]}
+            >
+              <TextView label={"Sorun Bildir"} textStyle={text} />
+            </TouchableOpacity>
+
+
+          </View>
+
+
+          {/* Change Password */}
+          <View style={[card, styles.bottomContainer, { borderColor: tertiaryColor }]}>
+
+            <TextView label={"Şifre Değiştirme"} textStyle={text} isBold />
+
+            {/* Old Password */}
+            <View style={styles.bottomContainerItem}>
+              <CustomIcons icon={"Password"} />
+              <View style={{ flexDirection: "column" }}>
+                <TextView label={"Eski Şifre:"} isBold={true} textStyle={text} />
+                <Input
+                  label={"Eski Şifre"}
+                  onUpdateValue={updateInput.bind(this, "oldPassword")}
+                  value={oldPassword}
+                  secure
+                  hasError={hasOldPasswordError}
+                />
+              </View>
+            </View>
+
+            {/* New Password */}
+            <View style={styles.bottomContainerItem}>
+              <CustomIcons icon={"Password"} />
+              <View style={{ flexDirection: "column" }}>
+                <TextView label={"Yeni Şifre:"} isBold={true} textStyle={text} />
+                <Input
+                  label={"Yeni Şifre"}
+                  onUpdateValue={updateInput.bind(this, "newPassword")}
+                  value={newPassword}
+                  secure
+                  hasError={hasPasswordError}
+                />
+              </View>
+            </View>
+
+            {/* Confirm Password */}
+            <View style={styles.bottomContainerItem}>
+              <CustomIcons icon={"Password"} />
+              <View style={{ flexDirection: "column" }}>
+                <TextView label={"Yeni Şifre (Tekrar)"} isBold={true} textStyle={text} />
+                <Input
+                  label={"Yeni Şifre (Tekrar)"}
+                  onUpdateValue={updateInput.bind(this, "confirmPassword")}
+                  value={confirmPassword}
+                  secure
+                  hasError={hasConfirmPasswordError}
+                />
+              </View>
+            </View>
+
+
+            {/* Change Password Button */}
+            <View style={[styles.buttonCon, { marginTop: 15 }]}>
+              <LinearGradient
+                colors={['#ff416c', '#ff4b2b']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.saveButtonHandle}
+              >
+                <TouchableOpacity
+                  style={styles.touchable}
+                  onPress={changePasswordHandle}
+                >
+                  <TextView label={"Şifreyi Değiştir"} textStyle={[text, { color: "white" }]} />
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+
+          </View>
+
+          {/* Logout Alert */}
+          <CustomAlert
+            visible={showAlert}
+            message="Çıkış yapmak istediğinize emin misiniz?"
+            onConfirm={() => {
+              logoutClickHandle()
+              setShowAlert(false);
+            }}
+            onCancel={() => setShowAlert(false)}
+          />
+
+
+          {/* Error Pop-up */}
+          <CustomPopup visible={showErrorAlert} message={errorAlertMessage} onClose={popupCloseHandle} type={"error"} />
+
+          {/* Change Password Pop-up */}
+          <CustomPopup visible={showChangePasswordPopup} message={showChangePasswordPopupMessage} onClose={popupCloseHandle} type={"success"} />
+
+          {/* Logout */}
+          <TouchableOpacity
+            onPress={logoutAlert}
+            style={[card, { width: "100%", height: 60, justifyContent: "center", marginTop: 13 }]}
+          >
+            <TextView label={"Çıkış Yap"} textStyle={[text, { color: "red" }]} />
+          </TouchableOpacity>
+
+
+
+        </CustomContainer>
+      </SafeAreaView>
+    )
+  }
+}
+
+export default MyProfileScreen
+
+const styles = StyleSheet.create({
+  iconCon: {
+    marginTop: 15
+  },
+  titleTxtCon: {
+    marginTop: "25",
+    alignItems: "center"
+  },
+  amountTxtCon: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 3
+  },
+  amountItem: {
+    alignItems: "center",
+    paddingHorizontal: 5,
+    justifyContent: "center",
+    flex: 1
+  },
+  bottomCon: {
+    width: "95%",
+    marginTop: 25,
+  },
+  bottomCard: {
+    width: "100%",
+    marginTop: 10
+  },
+  bottomContainer: {
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 10,
+    paddingRight: 20,
+    marginTop: 10,
+    width: "100%",
+    borderRadius: 30,
+    marginBottom: 10
+  },
+  bottomContainerItem: {
+    marginVertical: 15,
+    flexDirection: "row"
+  },
+  saveButtonHandle: {
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+    alignItems: "center",
+  },
+  buttonCon: {
+    width: "100%",
+    paddingHorizontal: 15,
+
+  }
+})
