@@ -4,7 +4,17 @@
     "slug": "MyApp1",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/walletLogo.jpg",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/walletLogo.jpg",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,12 +27,6 @@
     },
     "ios": {
       "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

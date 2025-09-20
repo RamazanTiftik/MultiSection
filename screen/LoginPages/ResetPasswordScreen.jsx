@@ -1,5 +1,5 @@
-import { Alert, BackHandler, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import {  BackHandler, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import  { useEffect, useState } from 'react'
 import TextView from '../../component/TextView'
 import Input from '../../component/Input'
 import CustomIcons from '../../component/CustomIcons'
@@ -16,7 +16,6 @@ const ResetPasswordScreen = ({ navigation }) => {
   //theme
   const text = themes.textTheme.text
   const card = themes.card.cardView
-  const loadingContainer = themes.loading.loadingContainer
 
   //email & password
   const [email, setEmail] = useState("")

@@ -10,6 +10,7 @@ import AccountTransactionsRow from '../component/FlatListRow/AccountTransactions
 import { useDispatch, useSelector } from 'react-redux'
 import { getFilteredPostData, getYearlyPostData } from '../redux/slices/HomePageSlice'
 import ModalContent from '../component/ModalContent'
+import CustomIndicator from '../component/CustomIndicator'
 
 const HomeScreen = ({ navigation }) => {
 
@@ -26,6 +27,12 @@ const HomeScreen = ({ navigation }) => {
   //theme - redux
   const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
   const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+  //general loading
+  const authLoading = useSelector((state) => state.auth.loading)
+  const homePageLoading = useSelector((state) => state.homePage.loading)
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const generalLoading = authLoading || homePageLoading || themeLoading
 
   //theme
   const secondaryColor = themes.colorTheme.secondary.color
@@ -213,242 +220,251 @@ const HomeScreen = ({ navigation }) => {
 
 
   //VIEW
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
+  if (generalLoading) {
+    return (
+      <View>
+        <CustomIndicator />
+      </View>
+    )
 
-      {/* Fab Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setIsModalVisible(true)}
-      >
-        <Image
-          source={require('../assets/fab_button.png')}
-          style={styles.fabIcon}
-        />
-      </TouchableOpacity>
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
 
-      <CustomContainer>
+        {/* Fab Button */}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setIsModalVisible(true)}
+        >
+          <Image
+            source={require('../assets/fab_button.png')}
+            style={styles.fabIcon}
+          />
+        </TouchableOpacity>
+
+        <CustomContainer>
 
 
-        {/* Up Bar Buttons */}
-        <View style={styles.upBar}>
+          {/* Up Bar Buttons */}
+          <View style={styles.upBar}>
 
-          {/* Income Butonu */}
-          <LinearGradient
-            colors={selectedButton === "Gelir" ? [theme.income1 || '#56ab2f', theme.income2 || '#a8e063'] : [tertiaryColor, tertiaryColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientBtn}
-          >
-            <TouchableOpacity
-              style={styles.touchable}
-              onPress={incomeButtonHandle}
+            {/* Income Butonu */}
+            <LinearGradient
+              colors={selectedButton === "Gelir" ? [theme.income1 || '#56ab2f', theme.income2 || '#a8e063'] : [tertiaryColor, tertiaryColor]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientBtn}
             >
-              <Text style={selectedButton === "Gelir" ? styles.selectedBtnText : styles.btnText}>{"Gelir"}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          {/* Outcome Butonu */}
-          <LinearGradient
-            colors={selectedButton === "Gider" ? [theme.outcome1 || '#e74c3c', theme.outcome2 || '#f1948a'] : [tertiaryColor, tertiaryColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientBtn}
-          >
-            <TouchableOpacity
-              style={styles.touchable}
-              onPress={outcomeButtonHandle}
-            >
-              <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          {/* Summary Butonu */}
-          <LinearGradient
-            colors={selectedButton === "Özet" ? [theme.summary1 || '#e74c3c', theme.summary2 || '#f1948a'] : [tertiaryColor, tertiaryColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientBtn}
-          >
-            <TouchableOpacity
-              style={styles.touchable}
-              onPress={summaryButtonHandle}
-            >
-              <Text style={selectedButton === "Özet" ? styles.selectedBtnText : styles.btnText}>{"Özet"}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-        </View>
-
-
-        {/* Main Card */}
-        <View style={[card, { alignItems: "flex-start", marginTop: 15, paddingHorizontal: 15 }]}>
-
-          {/* Top Infos */}
-          <View style={styles.upperInUpBar}>
-
-            {/* Mounthly Amount */}
-            <TextView
-              label={
-                selectedButton === "Özet" && selectedSummaryMonthData
-                  ? `${(selectedSummaryMonthData.income - selectedSummaryMonthData.expense).toLocaleString("tr-TR", {
-                    signDisplay: "always",
-                  })} ₺`
-                  : selectedMonthData
-                    ? `${selectedMonthData.value.toLocaleString("tr-TR")} ₺`
-                    : "-"
-              }
-              textStyle={[styles.amountMounthly, { color: theme.text || "#007AFF" }]}
-            />
-
-
-            {/* Years Dropdown */}
-            <View>
-              <CustomFlatList
-                data={years}
-                selectedValue={selectedYear}
-                onValueChange={setSelectedYear}
-                width={130}
-              />
-            </View>
-
-          </View>
-
-
-          {/* Date */}
-          {!!selectedItem.label && (
-            <View>
-              <TextView label={`${selectedItem.label} ${selectedYear.value}`} textStyle={styles.dateText} />
-            </View>
-          )}
-
-
-          {/* Graph */}
-          {selectedButton === "Özet" ? (
-            <View style={styles.graphCon}>
-              <View style={{ flex: 1 }}>
-                <CustomBarChart
-                  data={summaryChartData}
-                  onPressAction={(selected) => {
-                    setSelectedItem(selected)
-                  }}
-                  type={selectedButton}
-                />
-              </View>
-            </View>
-
-          ) : (
-            <View style={styles.graphCon}>
-              <View style={{ flex: 1 }}>
-                <CustomBarChart
-                  data={chartData}
-                  onPressAction={(selected) => {
-                    setSelectedItem(selected)
-                  }}
-                  type={selectedButton}
-                  winter1={theme.winter1}
-                  winter2={theme.winter2}
-                  spring1={theme.spring1}
-                  spring2={theme.spring2}
-                  summer1={theme.summer1}
-                  summer2={theme.summer2}
-                  autumn1={theme.autumn1}
-                  autumn2={theme.autumn2}
-                />
-              </View>
-            </View>
-          )}
-
-        </View>
-
-
-        {/* Fab Button - Modal */}
-        {isModalVisible && (
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-
-              <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>Eklentiler</Text>
-
-              <View style={styles.modalGrid}>
-
-                {/* AI Chat */}
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={modalAIAnalysisHandle}
-                >
-                  <ModalContent tabTitle={"AIAnaliz"} tabImage={require("./../assets/robot.jpg")} />
-                </TouchableOpacity>
-
-
-                {/* User Target */}
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={modalUserTargetHandle}
-                >
-                  <ModalContent tabTitle={"Hedeflerim"} tabImage={require("./../assets/target.jpg")} />
-                </TouchableOpacity>
-
-
-                {/* AI Chat */}
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={modalAIChatHandle}
-                >
-                  <ModalContent tabTitle={"AISor"} tabImage={require("./../assets/aiAsk.jpg")} />
-                </TouchableOpacity>
-
-
-                {/* Theme */}
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={modalSetThemeHandle}
-                >
-                  <ModalContent tabTitle={"Tema"} tabImage={require("./../assets/colorTheme.jpg")} />
-                </TouchableOpacity>
-
-              </View>
-
-
-              <TouchableOpacity onPress={() => setIsModalVisible(false)} style={[styles.modalCloseBtn, {backgroundColor: theme.mainButton1 || "#007AFF"}]}>
-                <Text style={{ color: "#fff" }}>Kapat</Text>
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={incomeButtonHandle}
+              >
+                <Text style={selectedButton === "Gelir" ? styles.selectedBtnText : styles.btnText}>{"Gelir"}</Text>
               </TouchableOpacity>
+            </LinearGradient>
 
-            </View>
+            {/* Outcome Butonu */}
+            <LinearGradient
+              colors={selectedButton === "Gider" ? [theme.outcome1 || '#e74c3c', theme.outcome2 || '#f1948a'] : [tertiaryColor, tertiaryColor]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientBtn}
+            >
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={outcomeButtonHandle}
+              >
+                <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+
+            {/* Summary Butonu */}
+            <LinearGradient
+              colors={selectedButton === "Özet" ? [theme.summary1 || '#e74c3c', theme.summary2 || '#f1948a'] : [tertiaryColor, tertiaryColor]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientBtn}
+            >
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={summaryButtonHandle}
+              >
+                <Text style={selectedButton === "Özet" ? styles.selectedBtnText : styles.btnText}>{"Özet"}</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+
           </View>
-        )}
 
 
-        {/* Account Transactions */}
-        {!!selectedItem.label && (
-          <View style={styles.bottomCard}>
+          {/* Main Card */}
+          <View style={[card, { alignItems: "flex-start", marginTop: 15, paddingHorizontal: 15 }]}>
 
-            <View style={{ marginBottom: 10 }}>
-              <TextView label={`${selectedItem.label} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
-            </View>
+            {/* Top Infos */}
+            <View style={styles.upperInUpBar}>
 
-            {transactionsToShow.map(item => (
-              <View key={item.id} style={card}>
-                <AccountTransactionsRow
-                  title={item.description || "Açıklama Yok"}
-                  amount={item.amount || "0,00"}
-                  date={
-                    item.createdAt
-                      ? new Date(item.createdAt).toLocaleDateString('tr-TR')
-                      : "Tarih Yok"
-                  }
-                  type={item.category ? "Gider" : "Gelir"}
+              {/* Mounthly Amount */}
+              <TextView
+                label={
+                  selectedButton === "Özet" && selectedSummaryMonthData
+                    ? `${(selectedSummaryMonthData.income - selectedSummaryMonthData.expense).toLocaleString("tr-TR", {
+                      signDisplay: "always",
+                    })} ₺`
+                    : selectedMonthData
+                      ? `${selectedMonthData.value.toLocaleString("tr-TR")} ₺`
+                      : "-"
+                }
+                textStyle={[styles.amountMounthly, { color: theme.text || "#007AFF" }]}
+              />
+
+
+              {/* Years Dropdown */}
+              <View>
+                <CustomFlatList
+                  data={years}
+                  selectedValue={selectedYear}
+                  onValueChange={setSelectedYear}
+                  width={130}
                 />
               </View>
-            ))}
 
+            </View>
+
+
+            {/* Date */}
+            {!!selectedItem.label && (
+              <View>
+                <TextView label={`${selectedItem.label} ${selectedYear.value}`} textStyle={styles.dateText} />
+              </View>
+            )}
+
+
+            {/* Graph */}
+            {selectedButton === "Özet" ? (
+              <View style={styles.graphCon}>
+                <View style={{ flex: 1 }}>
+                  <CustomBarChart
+                    data={summaryChartData}
+                    onPressAction={(selected) => {
+                      setSelectedItem(selected)
+                    }}
+                    type={selectedButton}
+                  />
+                </View>
+              </View>
+
+            ) : (
+              <View style={styles.graphCon}>
+                <View style={{ flex: 1 }}>
+                  <CustomBarChart
+                    data={chartData}
+                    onPressAction={(selected) => {
+                      setSelectedItem(selected)
+                    }}
+                    type={selectedButton}
+                    winter1={theme.winter1}
+                    winter2={theme.winter2}
+                    spring1={theme.spring1}
+                    spring2={theme.spring2}
+                    summer1={theme.summer1}
+                    summer2={theme.summer2}
+                    autumn1={theme.autumn1}
+                    autumn2={theme.autumn2}
+                  />
+                </View>
+              </View>
+            )}
 
           </View>
-        )}
 
 
-      </CustomContainer>
-    </SafeAreaView >
-  )
+          {/* Fab Button - Modal */}
+          {isModalVisible && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+
+                <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>Eklentiler</Text>
+
+                <View style={styles.modalGrid}>
+
+                  {/* AI Chat */}
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={modalAIAnalysisHandle}
+                  >
+                    <ModalContent tabTitle={"İşlemlerim"} tabImage={require("./../assets/robot.jpg")} />
+                  </TouchableOpacity>
+
+
+                  {/* User Target */}
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={modalUserTargetHandle}
+                  >
+                    <ModalContent tabTitle={"Hedeflerim"} tabImage={require("./../assets/target.jpg")} />
+                  </TouchableOpacity>
+
+
+                  {/* AI Chat */}
+                  {/* <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={modalAIChatHandle}
+                  >
+                    <ModalContent tabTitle={"AISor"} tabImage={require("./../assets/aiAsk.jpg")} />
+                  </TouchableOpacity> */}
+
+
+                  {/* Theme */}
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={modalSetThemeHandle}
+                  >
+                    <ModalContent tabTitle={"Tema"} tabImage={require("./../assets/colorTheme.jpg")} />
+                  </TouchableOpacity>
+
+                </View>
+
+
+                <TouchableOpacity onPress={() => setIsModalVisible(false)} style={[styles.modalCloseBtn, { backgroundColor: theme.mainButton1 || "#007AFF" }]}>
+                  <Text style={{ color: "#fff" }}>Kapat</Text>
+                </TouchableOpacity>
+
+              </View>
+            </View>
+          )}
+
+
+          {/* Account Transactions */}
+          {!!selectedItem.label && (
+            <View style={styles.bottomCard}>
+
+              <View style={{ marginBottom: 10 }}>
+                <TextView label={`${selectedItem.label} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
+              </View>
+
+              {transactionsToShow.map(item => (
+                <View key={item.id} style={card}>
+                  <AccountTransactionsRow
+                    title={item.description || "Açıklama Yok"}
+                    amount={item.amount || "0,00"}
+                    date={
+                      item.createdAt
+                        ? new Date(item.createdAt).toLocaleDateString('tr-TR')
+                        : "Tarih Yok"
+                    }
+                    type={item.category ? "Gider" : "Gelir"}
+                  />
+                </View>
+              ))}
+
+
+            </View>
+          )}
+
+
+        </CustomContainer>
+      </SafeAreaView >
+    )
+  }
 }
 
 export default HomeScreen

@@ -7,6 +7,7 @@ import CustomIcons from '../../../../component/CustomIcons';
 import SetThemeRow from '../../../../component/FlatListRow/SetThemeRow';
 import { useDispatch, useSelector } from 'react-redux';
 import { setTheme } from '../../../../redux/slices/ThemeSlice';
+import CustomIndicator from '../../../../component/CustomIndicator';
 
 // Tema paletleri
 const themePalettes = [
@@ -68,8 +69,12 @@ const ThemeSetScreen = ({ navigation }) => {
   const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
   const theme = useSelector(state => state.theme.themes[selectedThemeId]);
 
+  //general loading
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const generalLoading = themeLoading
+
   //local state
-  const [selectedTheme, setSelectedTheme] = useState('mango_dreams');
+  const [selectedTheme, setSelectedTheme] = useState(selectedThemeId);
 
 
   const backAction = () => {
@@ -115,22 +120,31 @@ const ThemeSetScreen = ({ navigation }) => {
 
 
   //VIEW
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, paddingVertical: -20 }}>
-      <CustomContainer>
-        {themePalettes.map((theme) => (
-          <SetThemeRow
-            key={theme.id}
-            id={theme.id}
-            name={theme.name}
-            colors={theme.colors}
-            isSelected={selectedTheme === theme.id}
-            onPress={() => clickHandle(theme.id)}
-          />
-        ))}
-      </CustomContainer>
-    </SafeAreaView>
-  );
+  if (generalLoading) {
+    return (
+      <View>
+        <CustomIndicator />
+      </View>
+    )
+
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, paddingVertical: -20 }}>
+        <CustomContainer>
+          {themePalettes.map((theme) => (
+            <SetThemeRow
+              key={theme.id}
+              id={theme.id}
+              name={theme.name}
+              colors={theme.colors}
+              isSelected={selectedTheme === theme.id}
+              onPress={() => clickHandle(theme.id)}
+            />
+          ))}
+        </CustomContainer>
+      </SafeAreaView>
+    );
+  }
 };
 
 export default ThemeSetScreen;

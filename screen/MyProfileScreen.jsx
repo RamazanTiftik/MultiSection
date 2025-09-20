@@ -13,6 +13,7 @@ import { changePassword, logoutHandle } from '../redux/slices/AuthSlice'
 import CustomAlert from '../component/CustomAlert'
 import { doc, getDoc } from "firebase/firestore";
 import CustomPopup from '../component/CustomPopup'
+import CustomIndicator from '../component/CustomIndicator'
 
 
 const MyProfileScreen = ({ navigation }) => {
@@ -251,7 +252,7 @@ const MyProfileScreen = ({ navigation }) => {
   //VIEW
   if (loading) {
     <View>
-      <Text>Yüklenioy</Text>
+      <CustomIndicator />
     </View>
   } else {
     return (

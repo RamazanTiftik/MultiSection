@@ -1,14 +1,15 @@
 import { BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import  { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import CustomIcons from '../../../component/CustomIcons';
 import CustomContainer from '../../../component/CustomContainer';
 import CustomAlert from '../../../component/CustomAlert';
 import { themes } from '../../../theme/Themes';
 import CustomPopup from '../../../component/CustomPopup';
-import { deleteNoteById, getNoteById } from '../../../redux/slices/UserNoteSlice';
+import { deleteNoteById, getNoteById, updateNoteById } from '../../../redux/slices/UserNoteSlice';
 import Input from '../../../component/Input';
 import { LinearGradient } from 'expo-linear-gradient';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 
 const SingleUserNoteScreen = ({ route, navigation }) => {
@@ -27,13 +28,14 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
     const userId = useSelector((state) => state.auth.userId);
     const dispatch = useDispatch();
     const { content, createdAt } = useSelector((state) => state.userNote.selectedNote)
-    const loading = useSelector((state) => state.userNote.loading)
     //theme - redux
     const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
     const theme = useSelector(state => state.theme.themes[selectedThemeId]);
-
     //general loading
-    const [generalLoading, setGeneralLoading] = useState(loading)
+    const authLoading = useSelector((state) => state.auth.loading)
+    const userNoteLoading = useSelector((state) => state.userNote.loading)
+    const themeLoading = useSelector((state) => state.theme.loading)
+    const generalLoading = authLoading || userNoteLoading || themeLoading
 
     // Local text states
     const [noteText, setNoteText] = useState(content);
@@ -100,7 +102,7 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
 
     //update user note handle
     const saveButtonHandle = () => {
-        console.log(3)
+        dispatch(updateNoteById({ userId: userId, noteId: noteId, content: noteText }))
     }
 
     //delete user note handle 
@@ -122,13 +124,9 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
 
     //set data for ui when screen is focused
     useEffect(() => {
-        setGeneralLoading(true)
-
         //set texts
         setNoteText(content)
         setNoteCreatedAtText(createdAt)
-
-        setGeneralLoading(false)
     }, [dispatch, content, createdAt])
 
 
@@ -146,7 +144,7 @@ const SingleUserNoteScreen = ({ route, navigation }) => {
     if (generalLoading) {
         return (
             <View>
-                <Text>234</Text>
+                <CustomIndicator />
             </View>
         )
 

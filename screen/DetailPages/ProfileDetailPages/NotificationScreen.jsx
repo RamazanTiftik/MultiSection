@@ -6,6 +6,7 @@ import CustomContainer from '../../../component/CustomContainer';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNotificationByUserId, updateNotification } from '../../../redux/slices/NotificationSlice';
 import TextView from '../../../component/TextView';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 const NotificationScreen = ({ navigation }) => {
 
@@ -21,6 +22,11 @@ const NotificationScreen = ({ navigation }) => {
     //theme - redux
     const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
     const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+    //general loading
+    const authLoading = useSelector((state) => state.auth.loading)
+    const notificationLoading = useSelector((state) => state.notification.loading)
+    const themeLoading = useSelector((state) => state.theme.loading)
+    const generalLoading = authLoading || notificationLoading || themeLoading
 
     //loading
     const [loading, setLoading] = useState(false);
@@ -82,9 +88,9 @@ const NotificationScreen = ({ navigation }) => {
 
 
     //VIEW
-    if (loading) {
+    if (generalLoading) {
         <View>
-
+            <CustomIndicator />
         </View>
     } else {
         return (

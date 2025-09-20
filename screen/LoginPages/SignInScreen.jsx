@@ -1,16 +1,14 @@
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { themes } from '../../theme/Themes'
 import CustomContainer from '../../component/CustomContainer'
 import Input from '../../component/Input'
 import TextView from '../../component/TextView'
 import CustomIcons from '../../component/CustomIcons'
 import CustomButton from '../../component/CustomButton'
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { initializeApp } from "firebase/app";
-import { auth } from '../../firebaseConfig/Firebase';
 import { useDispatch } from 'react-redux'
-import { autoSignInHandle, login, loginHandle } from '../../redux/slices/AuthSlice'
+import { autoSignInHandle, loginHandle } from '../../redux/slices/AuthSlice'
+import CustomIndicator from '../../component/CustomIndicator'
 
 
 const SignInScreen = ({ navigation, onLogin }) => {
@@ -18,7 +16,6 @@ const SignInScreen = ({ navigation, onLogin }) => {
   //theme
   const text = themes.textTheme.text
   const card = themes.card.cardView
-  const loadingContainer = themes.loading.loadingContainer
 
   //email & password
   const [email, setEmail] = useState("")
@@ -104,7 +101,7 @@ const SignInScreen = ({ navigation, onLogin }) => {
   //VIEW
   if (loading) {
     <View>
-      <Text>Yükelniyor</Text>
+      <CustomIndicator />
     </View>
   } else {
     return (

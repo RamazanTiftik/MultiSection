@@ -17,12 +17,18 @@ import { themes } from '../../../../theme/Themes';
 import { fetchExpense, fetchIncome } from '../../../../redux/slices/pluginSlice/AiAnalysisSlice';
 import { runAI } from '../../../../firebaseConfig/AI';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomIndicator from '../../../../component/CustomIndicator';
 
 
 const AIAnalysisScreen = ({ navigation }) => {
 
-  //local loading
+  //ai chat loading
   const [loading, setLoading] = useState(false);
+
+  //general loading
+  const authLoading = useSelector((state) => state.auth.loading)
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const generalLoading = authLoading || themeLoading
 
   //redux state
   const dispatch = useDispatch();
@@ -41,6 +47,7 @@ const AIAnalysisScreen = ({ navigation }) => {
 
   //theme
   const secondaryColor = themes.colorTheme.secondary.color;
+
 
   //Back Button Func
   const backAction = () => {
@@ -130,64 +137,73 @@ Yapay Zeka:
 
 
   //VIEW
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, width: '100%', height: '50%' }}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
+  if (generalLoading) {
+    return (
+      <View>
+        <CustomIndicator />
+      </View>
+    )
 
-          {/* Message List */}
-          <FlatList
-            ref={flatListRef}
-            data={[...messages].reverse()} // veriyi ters çevir
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <View
-                style={[
-                  styles.messageBubble,
-                  item.sender === 'user' ? styles.userBubble : styles.aiBubble,
-                  { backgroundColor: theme.summary1 }
-                ]}
-              >
-                <Text style={item.sender === 'user' ? styles.userText : styles.aiText}>
-                  {item.text}
-                </Text>
-              </View>
-            )}
-            inverted
-            contentContainerStyle={styles.messageList}
-            keyboardShouldPersistTaps="handled"
-          />
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, width: '100%', height: '50%' }}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
 
-
-          {/* Loading Indicator */}
-          {loading && <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 8 }} />}
-
-
-          {/* Bottom Message Container */}
-          <View style={styles.inputContainer}>
-
-            {/* Text Input */}
-            <TextInput
-              style={styles.textInput}
-              placeholder="Bir şey yazın..."
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-              returnKeyType="send"
-              onSubmitEditing={handleSend}
+            {/* Message List */}
+            <FlatList
+              ref={flatListRef}
+              data={[...messages].reverse()} // veriyi ters çevir
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <View
+                  style={[
+                    styles.messageBubble,
+                    item.sender === 'user' ? styles.userBubble : styles.aiBubble,
+                    { backgroundColor: theme.summary1 }
+                  ]}
+                >
+                  <Text style={item.sender === 'user' ? styles.userText : styles.aiText}>
+                    {item.text}
+                  </Text>
+                </View>
+              )}
+              inverted
+              contentContainerStyle={styles.messageList}
+              keyboardShouldPersistTaps="handled"
             />
 
-            {/* Button */}
-            <TouchableOpacity onPress={handleSend} style={[styles.sendButton, { backgroundColor: theme.mainButton1 || "#007AFF" }]}>
-              <Text style={styles.sendButtonText}>Gönder</Text>
-            </TouchableOpacity>
 
+            {/* Loading Indicator */}
+            {loading && <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 8 }} />}
+
+
+            {/* Bottom Message Container */}
+            <View style={styles.inputContainer}>
+
+              {/* Text Input */}
+              <TextInput
+                style={styles.textInput}
+                placeholder="Bir şey yazın..."
+                value={inputText}
+                onChangeText={setInputText}
+                multiline
+                returnKeyType="send"
+                onSubmitEditing={handleSend}
+              />
+
+              {/* Button */}
+              <TouchableOpacity onPress={handleSend} style={[styles.sendButton, { backgroundColor: theme.mainButton1 || "#007AFF" }]}>
+                <Text style={styles.sendButtonText}>Gönder</Text>
+              </TouchableOpacity>
+
+            </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
-  );
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    );
+  }
 };
 
 export default AIAnalysisScreen;

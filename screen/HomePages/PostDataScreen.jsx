@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getAllBankNames, getAllCategories, postDataUserData, savePostData } from '../../redux/slices/PostDataSlice'
 import { Timestamp } from 'firebase/firestore'
 import { getFilteredPostData } from '../../redux/slices/HomePageSlice'
+import CustomIndicator from '../../component/CustomIndicator'
 
 
 const PostDataScreen = ({ navigation }) => {
@@ -48,6 +49,13 @@ const PostDataScreen = ({ navigation }) => {
   //theme - redux
   const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
   const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+  //general loading
+  const authLoading = useSelector((state) => state.auth.loading)
+  const targetPlannerLoading = useSelector((state) => state.postData.loading)
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const homePageLoading = useSelector((state) => state.homePage.loading)
+  const generalLoading = authLoading || targetPlannerLoading || themeLoading || homePageLoading
 
   //datas local state
   const [selectedMonth, setSelectedMonth] = useState(months[5])
@@ -269,357 +277,366 @@ const PostDataScreen = ({ navigation }) => {
 
 
   //VIEW
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
-
-      <View style={[styles.topBar, { backgroundColor: tertiaryColor }]}>
-        <CustomFlatlist
-          data={months}
-          selectedValue={selectedMonth}
-          onValueChange={setSelectedMonth}
-        />
-
-        <CustomFlatlist
-          data={years}
-          selectedValue={selectedYear}
-          onValueChange={setSelectedYear}
-        />
+  if (generalLoading) {
+    return (
+      <View>
+        <CustomIndicator />
       </View>
+    )
 
-      <CustomContainer>
+  } else {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor }}>
 
-        {/* Up Bar Buttons */}
-        <View style={styles.upBar}>
+        <View style={[styles.topBar, { backgroundColor: tertiaryColor }]}>
+          <CustomFlatlist
+            data={months}
+            selectedValue={selectedMonth}
+            onValueChange={setSelectedMonth}
+          />
 
-          {/* Income Butonu */}
-          <LinearGradient
-            colors={selectedButton === "Gelir" ? [theme.income1 || '#56ab2f', theme.income2 || '#a8e063'] : [tertiaryColor, tertiaryColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.gradientBtn]}
-          >
-            <TouchableOpacity
-              style={styles.touchable}
-              onPress={incomeButtonHandle}
-            >
-              <Text style={selectedButton === "Gelir" ? styles.selectedBtnText : styles.btnText}>{"Gelir"}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          {/* Outcome Butonu */}
-          <LinearGradient
-            colors={selectedButton === "Gider" ? [theme.outcome1 || '#e74c3c', theme.outcome2 || '#f1948a'] : [tertiaryColor, tertiaryColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientBtn}
-          >
-            <TouchableOpacity
-              style={styles.touchable}
-              onPress={outcomeButtonHandle}
-            >
-              <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
+          <CustomFlatlist
+            data={years}
+            selectedValue={selectedYear}
+            onValueChange={setSelectedYear}
+          />
         </View>
 
+        <CustomContainer>
 
-        {/* Main Card */}
-        {
-          selectedButton === "Gelir" ? (
-            //INCOME BUTTON
+          {/* Up Bar Buttons */}
+          <View style={styles.upBar}>
 
-            <View style={card}>
+            {/* Income Butonu */}
+            <LinearGradient
+              colors={selectedButton === "Gelir" ? [theme.income1 || '#56ab2f', theme.income2 || '#a8e063'] : [tertiaryColor, tertiaryColor]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.gradientBtn]}
+            >
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={incomeButtonHandle}
+              >
+                <Text style={selectedButton === "Gelir" ? styles.selectedBtnText : styles.btnText}>{"Gelir"}</Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
-              {/* Description */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Description"} />
-                <View style={styles.inputContainer}>
-                  <TextView label={"Açıklama:"} textStyle={text} />
-                  <Input
-                    onUpdateValue={updateInput.bind(this, "description")}
-                    value={description}
-                    label={"Açıklama giriniz"}
-                    hasError={hasDescriptionError}
-                  />
-                </View>
-              </View>
+            {/* Outcome Butonu */}
+            <LinearGradient
+              colors={selectedButton === "Gider" ? [theme.outcome1 || '#e74c3c', theme.outcome2 || '#f1948a'] : [tertiaryColor, tertiaryColor]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientBtn}
+            >
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={outcomeButtonHandle}
+              >
+                <Text style={selectedButton === "Gider" ? styles.selectedBtnText : styles.btnText}>{"Gider"}</Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
-
-              {/* Amount */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Amount"} />
-                <View style={[styles.inputContainer]}>
-                  <TextView label={"Miktar:"} textStyle={[text, { marginLeft: 3 }]} />
-                  <Input
-                    onUpdateValue={updateInput.bind(this, "amount")}
-                    value={amount}
-                    label={"0.00"}
-                    hasError={hasAmountError}
-                    keyboardType={"numeric"}
-                    currency={"tl"}
-                  />
-                </View>
-              </View>
-
-
-              {/* Date */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Date"} />
-
-                <View style={styles.dateContainer}>
-                  <TextView label={"Tarih:"} textStyle={text} />
-                  <Pressable onPress={showDatePicker} style={styles.dateInput}>
-                    <TextView
-                      label={
-                        selectedDate
-                          ? selectedDate.toLocaleDateString('tr-TR')
-                          : "Tarih Seçiniz"
-                      }
-                      textStyle={text}
-                    />
-                  </Pressable>
-
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                    textColor={theme === 'dark' ? '#fff' : '#000'}
-                    themeVariant="light"
-                    display="spinner"
-                  />
-                </View>
-              </View>
-
-
-              {/* Bank */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Bank"} />
-
-                <View style={styles.categoryCon}>
-                  <TextView label={"Banka"} textStyle={text} />
-                  <View>
-                    <CustomFlatlist
-                      data={banks}
-                      selectedValue={selectedBank}
-                      onValueChange={setSelectedBank}
-                      width={280}
-                    />
-                  </View>
-                </View>
-              </View>
-
-
-              {/* Monthly Choose */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Task"} />
-
-                <View style={styles.categoryCon}>
-                  <TextView label={"Düzenli (Aylık) Gelir Mi?"} textStyle={text} />
-                  <View>
-                    <CustomFlatlist
-                      data={yesOrNo}
-                      selectedValue={selectedChoose}
-                      onValueChange={setSelectedChoose}
-                      width={280}
-                    />
-                  </View>
-                </View>
-              </View>
-
-
-              {/* Add Buttons */}
-              <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
-                <LinearGradient
-                  colors={[theme.income1 || '#56ab2f', theme.income2 || '#a8e063']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.addButtonHandle}
-                >
-                  <TouchableOpacity
-                    style={styles.touchable}
-                    onPress={addButtonHandle}
-                  >
-                    <Text style={styles.selectedBtnText}>{"Gelir Ekle"}</Text>
-                  </TouchableOpacity>
-                </LinearGradient>
-              </View>
-
-            </View>
-
-          ) : (
-            //OUTCOME BUTTON
-
-            <View style={card}>
-
-              {/* Description */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Description"} />
-                <View style={styles.inputContainer}>
-                  <TextView label={"Açıklama:"} textStyle={text} />
-                  <Input
-                    onUpdateValue={updateInput.bind(this, "description")}
-                    value={description}
-                    label={"Açıklama giriniz"}
-                    hasError={hasDescriptionError}
-                  />
-                </View>
-              </View>
-
-
-              {/* Amount */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Amount"} />
-                <View style={[styles.inputContainer]}>
-                  <TextView label={"Miktar:"} textStyle={[text, { marginLeft: 3 }]} />
-                  <Input
-                    onUpdateValue={updateInput.bind(this, "amount")}
-                    value={amount}
-                    label={"0.00"}
-                    hasError={hasAmountError}
-                    keyboardType={"numeric"}
-                    currency={"tl"}
-                  />
-                </View>
-              </View>
-
-
-              {/* Date */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Date"} />
-
-                <View style={styles.dateContainer}>
-                  <TextView label={"Tarih:"} textStyle={text} />
-                  <Pressable onPress={showDatePicker} style={styles.dateInput}>
-                    <TextView
-                      label={
-                        selectedDate
-                          ? selectedDate.toLocaleDateString('tr-TR')
-                          : "Tarih Seçiniz"
-                      }
-                      textStyle={text}
-                    />
-                  </Pressable>
-
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                    textColor={theme === 'dark' ? '#fff' : '#000'}
-                    themeVariant="light"
-                    display="spinner"
-                  />
-                </View>
-              </View>
-
-
-              {/* Bank */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Bank"} />
-
-                <View style={styles.categoryCon}>
-                  <TextView label={"Banka"} textStyle={text} />
-                  <View>
-                    <CustomFlatlist
-                      data={banks}
-                      selectedValue={selectedBank}
-                      onValueChange={setSelectedBank}
-                      width={280}
-                    />
-                  </View>
-                </View>
-              </View>
-
-
-              {/* Outcome Category */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Category"} />
-
-                <View style={styles.categoryCon}>
-                  <TextView label={"Kategori"} textStyle={text} />
-                  <View>
-                    <CustomFlatlist
-                      data={categories}
-                      selectedValue={selectedCategory}
-                      onValueChange={setSelectedCategory}
-                      width={280}
-                    />
-                  </View>
-                </View>
-              </View>
-
-
-              {/* Monthly Choose */}
-              <View style={styles.inputCard}>
-                <CustomIcons icon={"Task"} />
-
-                <View style={styles.categoryCon}>
-                  <TextView label={"Düzenli (Aylık) Gider Mi?"} textStyle={text} />
-                  <View>
-                    <CustomFlatlist
-                      data={yesOrNo}
-                      selectedValue={selectedChoose}
-                      onValueChange={setSelectedChoose}
-                      width={280}
-                    />
-                  </View>
-                </View>
-              </View>
-
-
-              {/* Add Buttons */}
-              <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
-                <LinearGradient
-                  colors={[theme.outcome1 || '#e74c3c', theme.outcome2 || '#f1948a']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.addButtonHandle}
-                >
-                  <TouchableOpacity
-                    style={styles.touchable}
-                    onPress={addButtonHandle}
-                  >
-                    <Text style={styles.selectedBtnText}>{"Gider Ekle"}</Text>
-                  </TouchableOpacity>
-                </LinearGradient>
-              </View>
-
-            </View>
-          )
-        }
-
-
-        {/* Account Transactions */}
-        <View style={styles.bottomCard}>
-          <View style={{ marginBottom: 10 }}>
-            <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
           </View>
 
-          {postDatas.map(item => (
-            <View key={item.id} style={card}>
-              <AccountTransactionsRow
-                title={item.description || "Açıklama Yok"}
-                amount={item.amount || "0,00"}
-                date={
-                  item.createdAt
-                    ? new Date(item.createdAt).toLocaleDateString('tr-TR')
-                    : "Tarih Yok"
-                }
-                type={item.category ? "Gider" : "Gelir"}
-              />
+
+          {/* Main Card */}
+          {
+            selectedButton === "Gelir" ? (
+              //INCOME BUTTON
+
+              <View style={card}>
+
+                {/* Description */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Description"} />
+                  <View style={styles.inputContainer}>
+                    <TextView label={"Açıklama:"} textStyle={text} />
+                    <Input
+                      onUpdateValue={updateInput.bind(this, "description")}
+                      value={description}
+                      label={"Açıklama giriniz"}
+                      hasError={hasDescriptionError}
+                    />
+                  </View>
+                </View>
+
+
+                {/* Amount */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Amount"} />
+                  <View style={[styles.inputContainer]}>
+                    <TextView label={"Miktar:"} textStyle={[text, { marginLeft: 3 }]} />
+                    <Input
+                      onUpdateValue={updateInput.bind(this, "amount")}
+                      value={amount}
+                      label={"0.00"}
+                      hasError={hasAmountError}
+                      keyboardType={"numeric"}
+                      currency={"tl"}
+                    />
+                  </View>
+                </View>
+
+
+                {/* Date */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Date"} />
+
+                  <View style={styles.dateContainer}>
+                    <TextView label={"Tarih:"} textStyle={text} />
+                    <Pressable onPress={showDatePicker} style={styles.dateInput}>
+                      <TextView
+                        label={
+                          selectedDate
+                            ? selectedDate.toLocaleDateString('tr-TR')
+                            : "Tarih Seçiniz"
+                        }
+                        textStyle={text}
+                      />
+                    </Pressable>
+
+                    <DateTimePickerModal
+                      isVisible={isDatePickerVisible}
+                      mode="date"
+                      onConfirm={handleConfirm}
+                      onCancel={hideDatePicker}
+                      textColor={theme === 'dark' ? '#fff' : '#000'}
+                      themeVariant="light"
+                      display="spinner"
+                    />
+                  </View>
+                </View>
+
+
+                {/* Bank */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Bank"} />
+
+                  <View style={styles.categoryCon}>
+                    <TextView label={"Banka"} textStyle={text} />
+                    <View>
+                      <CustomFlatlist
+                        data={banks}
+                        selectedValue={selectedBank}
+                        onValueChange={setSelectedBank}
+                        width={280}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+
+                {/* Monthly Choose */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Task"} />
+
+                  <View style={styles.categoryCon}>
+                    <TextView label={"Düzenli (Aylık) Gelir Mi?"} textStyle={text} />
+                    <View>
+                      <CustomFlatlist
+                        data={yesOrNo}
+                        selectedValue={selectedChoose}
+                        onValueChange={setSelectedChoose}
+                        width={280}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+
+                {/* Add Buttons */}
+                <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
+                  <LinearGradient
+                    colors={[theme.income1 || '#56ab2f', theme.income2 || '#a8e063']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.addButtonHandle}
+                  >
+                    <TouchableOpacity
+                      style={styles.touchable}
+                      onPress={addButtonHandle}
+                    >
+                      <Text style={styles.selectedBtnText}>{"Gelir Ekle"}</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </View>
+
+              </View>
+
+            ) : (
+              //OUTCOME BUTTON
+
+              <View style={card}>
+
+                {/* Description */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Description"} />
+                  <View style={styles.inputContainer}>
+                    <TextView label={"Açıklama:"} textStyle={text} />
+                    <Input
+                      onUpdateValue={updateInput.bind(this, "description")}
+                      value={description}
+                      label={"Açıklama giriniz"}
+                      hasError={hasDescriptionError}
+                    />
+                  </View>
+                </View>
+
+
+                {/* Amount */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Amount"} />
+                  <View style={[styles.inputContainer]}>
+                    <TextView label={"Miktar:"} textStyle={[text, { marginLeft: 3 }]} />
+                    <Input
+                      onUpdateValue={updateInput.bind(this, "amount")}
+                      value={amount}
+                      label={"0.00"}
+                      hasError={hasAmountError}
+                      keyboardType={"numeric"}
+                      currency={"tl"}
+                    />
+                  </View>
+                </View>
+
+
+                {/* Date */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Date"} />
+
+                  <View style={styles.dateContainer}>
+                    <TextView label={"Tarih:"} textStyle={text} />
+                    <Pressable onPress={showDatePicker} style={styles.dateInput}>
+                      <TextView
+                        label={
+                          selectedDate
+                            ? selectedDate.toLocaleDateString('tr-TR')
+                            : "Tarih Seçiniz"
+                        }
+                        textStyle={text}
+                      />
+                    </Pressable>
+
+                    <DateTimePickerModal
+                      isVisible={isDatePickerVisible}
+                      mode="date"
+                      onConfirm={handleConfirm}
+                      onCancel={hideDatePicker}
+                      textColor={theme === 'dark' ? '#fff' : '#000'}
+                      themeVariant="light"
+                      display="spinner"
+                    />
+                  </View>
+                </View>
+
+
+                {/* Bank */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Bank"} />
+
+                  <View style={styles.categoryCon}>
+                    <TextView label={"Banka"} textStyle={text} />
+                    <View>
+                      <CustomFlatlist
+                        data={banks}
+                        selectedValue={selectedBank}
+                        onValueChange={setSelectedBank}
+                        width={280}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+
+                {/* Outcome Category */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Category"} />
+
+                  <View style={styles.categoryCon}>
+                    <TextView label={"Kategori"} textStyle={text} />
+                    <View>
+                      <CustomFlatlist
+                        data={categories}
+                        selectedValue={selectedCategory}
+                        onValueChange={setSelectedCategory}
+                        width={280}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+
+                {/* Monthly Choose */}
+                <View style={styles.inputCard}>
+                  <CustomIcons icon={"Task"} />
+
+                  <View style={styles.categoryCon}>
+                    <TextView label={"Düzenli (Aylık) Gider Mi?"} textStyle={text} />
+                    <View>
+                      <CustomFlatlist
+                        data={yesOrNo}
+                        selectedValue={selectedChoose}
+                        onValueChange={setSelectedChoose}
+                        width={280}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+
+                {/* Add Buttons */}
+                <View style={[styles.inputCard, { paddingHorizontal: 20, marginTop: 15 }]}>
+                  <LinearGradient
+                    colors={[theme.outcome1 || '#e74c3c', theme.outcome2 || '#f1948a']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.addButtonHandle}
+                  >
+                    <TouchableOpacity
+                      style={styles.touchable}
+                      onPress={addButtonHandle}
+                    >
+                      <Text style={styles.selectedBtnText}>{"Gider Ekle"}</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </View>
+
+              </View>
+            )
+          }
+
+
+          {/* Account Transactions */}
+          <View style={styles.bottomCard}>
+            <View style={{ marginBottom: 10 }}>
+              <TextView label={`${selectedMonth.value} ${selectedYear.value} Hareketleri`} textStyle={titleTxt} />
             </View>
-          ))}
+
+            {postDatas.map(item => (
+              <View key={item.id} style={card}>
+                <AccountTransactionsRow
+                  title={item.description || "Açıklama Yok"}
+                  amount={item.amount || "0,00"}
+                  date={
+                    item.createdAt
+                      ? new Date(item.createdAt).toLocaleDateString('tr-TR')
+                      : "Tarih Yok"
+                  }
+                  type={item.category ? "Gider" : "Gelir"}
+                />
+              </View>
+            ))}
 
 
-        </View>
+          </View>
 
 
-      </CustomContainer>
+        </CustomContainer>
 
-    </SafeAreaView >
-  )
+      </SafeAreaView >
+    )
+  }
 }
 
 export default PostDataScreen

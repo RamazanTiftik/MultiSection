@@ -80,7 +80,7 @@ const AIAnalysisScreen = ({ navigation }) => {
                 color: theme.text || "#007AFF",
                 fontSize: 18,
             },
-            headerTitle: "Yapay Zeka Analizi",
+            headerTitle: "İşlemlerim",
 
             //back button
             headerLeft: () => (
@@ -267,7 +267,7 @@ Bu verileri değerlendirerek kısa ve sade bir mali analiz yap. Gerekiyorsa tasa
         return (
             <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, paddingTop: -30 }}>
                 <CustomContainer>
-                    <Text style={styles.header}>🧠 Harcama Analizi</Text>
+                   {/*  <Text style={styles.header}>🧠 Harcama Analizi</Text> */}
 
                     {/* Özet Kartlar */}
                     <View style={styles.cardsContainer}>
@@ -313,21 +313,21 @@ Bu verileri değerlendirerek kısa ve sade bir mali analiz yap. Gerekiyorsa tasa
 
 
                     {/* Analiz Butonu */}
-                    <TouchableOpacity style={[styles.analyzeButton, { backgroundColor: theme.income1 || "#007AFF" }]} onPress={handleAnalyze} disabled={loading}>
+                    {/* <TouchableOpacity style={[styles.analyzeButton, { backgroundColor: theme.income1 || "#007AFF" }]} onPress={handleAnalyze} disabled={loading}>
                         <Text style={styles.analyzeButtonText}>
                             {loading ? "Analiz Ediliyor..." : "🧾 Analizi Başlat"}
                         </Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     {/* Loading */}
-                    {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />}
+                    {/* {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />} */}
 
                     {/* AI Yanıtı */}
-                    {aiResponse !== '' && (
+                    {/* {aiResponse !== '' && (
                         <View style={styles.resultBox}>
                             <Text style={styles.resultText}>{aiResponse}</Text>
                         </View>
-                    )}
+                    )} */}
                 </CustomContainer>
             </SafeAreaView>
         );

@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteTargetPlan, getAllTargetPlans, getTargetPlanById, updateTargetPlanResult } from '../../../redux/slices/pluginSlice/TargetPlannerSlice';
 import CustomAlert from '../../../component/CustomAlert';
 import CustomPopup from '../../../component/CustomPopup';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 const TargetPlanDetail = ({ route, navigation }) => {
 
@@ -30,6 +31,12 @@ const TargetPlanDetail = ({ route, navigation }) => {
   //theme - redux
   const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
   const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+  //general loading
+  const authLoading = useSelector((state) => state.auth.loading)
+  const targetPlannerLoading = useSelector((state) => state.targetPlanner.loading)
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const generalLoading = authLoading || targetPlannerLoading || themeLoading
 
   //theme
   const secondaryColor = themes.colorTheme.secondary.color;
@@ -242,95 +249,104 @@ const TargetPlanDetail = ({ route, navigation }) => {
 
 
   //VIEW
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+  if (generalLoading) {
+    return (
+      <View>
+        <CustomIndicator />
+      </View>
+    )
 
-        {/* Info Card */}
-        <View style={[styles.infoCard, { borderLeftColor: theme.text || "#007AFF" }]}>
-          <Text style={[styles.infoTitle, { color: theme.text || "#007AFF" }]}>{plan.goalName}</Text>
-          <Text style={styles.infoAmount}>🎯 Toplam Tutar: {parseFloat(plan.goalAmount).toFixed(2)} ₺</Text>
-          <Text style={styles.infoType}>📌 Plan Türü: {planTypeName(plan.selectedPlan)}</Text>
-        </View>
+  } else {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
+
+          {/* Info Card */}
+          <View style={[styles.infoCard, { borderLeftColor: theme.text || "#007AFF" }]}>
+            <Text style={[styles.infoTitle, { color: theme.text || "#007AFF" }]}>{plan.goalName}</Text>
+            <Text style={styles.infoAmount}>🎯 Toplam Tutar: {parseFloat(plan.goalAmount).toFixed(2)} ₺</Text>
+            <Text style={styles.infoType}>📌 Plan Türü: {planTypeName(plan.selectedPlan)}</Text>
+          </View>
 
 
-        {/* Static Text */}
-        <Text style={styles.sectionTitle}>📅 Aylık Plan</Text>
+          {/* Static Text */}
+          <Text style={styles.sectionTitle}>📅 Aylık Plan</Text>
 
 
-        {/* Güncel ay sorusu */}
-        {
-          currentPlanIndex < planData.length &&
-          !planData[currentPlanIndex].tamamlandi &&
-          now.getDate() >= 25 && (
-            <View style={styles.questionCard}>
-              <Text style={styles.questionText}>
-                📅 Bu ay için <Text style={{ fontWeight: 'bold' }}>{planData[currentPlanIndex].birikim} ₺</Text> ayırmanız gerekiyordu. Hedefi gerçekleştirdiniz mi?
-              </Text>
-              <View style={styles.buttonGroup}>
-                <TouchableOpacity
-                  style={styles.successBtn}
-                  onPress={() => handleSuccess(currentPlanIndex)}
-                >
-                  <Text style={styles.btnText}>✅ Evet</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.failBtn}
-                  onPress={() => handleFailure(currentPlanIndex)}
-                >
-                  <Text style={styles.btnText}>❌ Hayır</Text>
-                </TouchableOpacity>
+          {/* Güncel ay sorusu */}
+          {
+            currentPlanIndex < planData.length &&
+            !planData[currentPlanIndex].tamamlandi &&
+            now.getDate() >= 25 && (
+              <View style={styles.questionCard}>
+                <Text style={styles.questionText}>
+                  📅 Bu ay için <Text style={{ fontWeight: 'bold' }}>{planData[currentPlanIndex].birikim} ₺</Text> ayırmanız gerekiyordu. Hedefi gerçekleştirdiniz mi?
+                </Text>
+                <View style={styles.buttonGroup}>
+                  <TouchableOpacity
+                    style={styles.successBtn}
+                    onPress={() => handleSuccess(currentPlanIndex)}
+                  >
+                    <Text style={styles.btnText}>✅ Evet</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.failBtn}
+                    onPress={() => handleFailure(currentPlanIndex)}
+                  >
+                    <Text style={styles.btnText}>❌ Hayır</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          )
-        }
+            )
+          }
 
 
-        {/* Plan Listesi */}
-        <View style={styles.planContainer}>
-          {planData.map((item, index) => (
-            <View
-              key={item.key}
-              style={[
-                styles.planItem,
-                item.durum === 'success'
-                  ? styles.successBackground
-                  : item.durum === 'fail'
-                    ? styles.failBackground
-                    : styles.pendingBackground
-              ]}
-            >
-              <Text style={styles.planText}>{item.ay}</Text>
-              <Text style={styles.planText}>{item.birikim} ₺</Text>
-              <Text style={styles.statusIcon}>
-                {item.durum === 'success' ? '✅' : item.durum === 'fail' ? '❌' : '🕒'}
-              </Text>
-            </View>
-          ))}
-        </View>
+          {/* Plan Listesi */}
+          <View style={styles.planContainer}>
+            {planData.map((item, index) => (
+              <View
+                key={item.key}
+                style={[
+                  styles.planItem,
+                  item.durum === 'success'
+                    ? styles.successBackground
+                    : item.durum === 'fail'
+                      ? styles.failBackground
+                      : styles.pendingBackground
+                ]}
+              >
+                <Text style={styles.planText}>{item.ay}</Text>
+                <Text style={styles.planText}>{item.birikim} ₺</Text>
+                <Text style={styles.statusIcon}>
+                  {item.durum === 'success' ? '✅' : item.durum === 'fail' ? '❌' : '🕒'}
+                </Text>
+              </View>
+            ))}
+          </View>
 
 
 
-        {/* Custom Alert for No */}
-        <CustomAlert
-          visible={alertVisible}
-          message={alertMessage}
-          onConfirm={alertConfirmHandle}
-          onCancel={alertCancelHandle}
-          isDelete={"Sil"}
-        />
+          {/* Custom Alert for No */}
+          <CustomAlert
+            visible={alertVisible}
+            message={alertMessage}
+            onConfirm={alertConfirmHandle}
+            onCancel={alertCancelHandle}
+            isDelete={"Sil"}
+          />
 
-        {/* Custom Popup */}
-        <CustomPopup
-          visible={popupVisible}
-          message={popupMessage}
-          onClose={() => setPopupVisible(false)}
-          type={popupType}
-        />
+          {/* Custom Popup */}
+          <CustomPopup
+            visible={popupVisible}
+            message={popupMessage}
+            onClose={() => setPopupVisible(false)}
+            type={popupType}
+          />
 
-      </ScrollView >
-    </SafeAreaView >
-  );
+        </ScrollView >
+      </SafeAreaView >
+    );
+  }
 };
 
 export default TargetPlanDetail;

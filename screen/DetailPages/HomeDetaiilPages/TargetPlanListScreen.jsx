@@ -9,6 +9,7 @@ import { getAllTargetPlans } from '../../../redux/slices/pluginSlice/TargetPlann
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { deleteTargetPlan } from '../../../redux/slices/pluginSlice/TargetPlannerSlice';
 import CustomAlert from '../../../component/CustomAlert';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 
 const TargetPlanListScreen = ({ navigation }) => {
@@ -23,6 +24,12 @@ const TargetPlanListScreen = ({ navigation }) => {
     //theme - redux
     const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
     const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+    //general loading
+    const authLoading = useSelector((state) => state.auth.loading)
+    const targetPlannerLoading = useSelector((state) => state.targetPlanner.loading)
+    const themeLoading = useSelector((state) => state.theme.loading)
+    const generalLoading = authLoading || targetPlannerLoading || themeLoading
 
     //alert
     const [alertVisible, setAlertVisible] = useState(false)
@@ -144,49 +151,58 @@ const TargetPlanListScreen = ({ navigation }) => {
 
 
     //VIEW
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, paddingBottom: 70 }}>
+    if (generalLoading) {
+        return (
+            <View>
+                <CustomIndicator />
+            </View>
+        )
 
-            <SwipeListView
-                data={targetedPlans}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <TargetPlanListRow
-                        item={item}
-                        onPress={() => clickRowHandle(item.id)}
-                        theme={theme}
-                    />
-                )}
-                renderHiddenItem={({ item }) => (
-                    <View style={styles.rowBack}>
-                        <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => hiddenDeleteHandle(item.id)}
-                        >
-                            <Text style={styles.deleteText}>Sil</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                rightOpenValue={-75}
-                disableRightSwipe
-                contentContainerStyle={{ paddingBottom: 16 }}
-                showsVerticalScrollIndicator={false}
-                friction={15}
-                tension={40}
-            />
+    } else {
+        return (
+            <SafeAreaView style={{ flex: 1, backgroundColor: secondaryColor, paddingBottom: 70 }}>
+
+                <SwipeListView
+                    data={targetedPlans}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <TargetPlanListRow
+                            item={item}
+                            onPress={() => clickRowHandle(item.id)}
+                            theme={theme}
+                        />
+                    )}
+                    renderHiddenItem={({ item }) => (
+                        <View style={styles.rowBack}>
+                            <TouchableOpacity
+                                style={styles.deleteButton}
+                                onPress={() => hiddenDeleteHandle(item.id)}
+                            >
+                                <Text style={styles.deleteText}>Sil</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    rightOpenValue={-75}
+                    disableRightSwipe
+                    contentContainerStyle={{ paddingBottom: 16 }}
+                    showsVerticalScrollIndicator={false}
+                    friction={15}
+                    tension={40}
+                />
 
 
-            {/* Custom Alert for No */}
-            <CustomAlert
-                visible={alertVisible}
-                message={alertMessage}
-                onConfirm={alertConfirmHandle}
-                onCancel={alertCancelHandle}
-            />
+                {/* Custom Alert for No */}
+                <CustomAlert
+                    visible={alertVisible}
+                    message={alertMessage}
+                    onConfirm={alertConfirmHandle}
+                    onCancel={alertCancelHandle}
+                />
 
 
-        </SafeAreaView>
-    )
+            </SafeAreaView>
+        )
+    }
 }
 
 export default TargetPlanListScreen

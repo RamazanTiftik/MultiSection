@@ -8,6 +8,7 @@ import TextView from '../../../component/TextView';
 import Input from '../../../component/Input';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserInfoById, updateUserDataById } from '../../../redux/slices/UserInfoSlice';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 
 const MonthlyInfoScreen = ({ navigation }) => {
@@ -25,6 +26,12 @@ const MonthlyInfoScreen = ({ navigation }) => {
   //theme - redux
   const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
   const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+  //general loading
+  const authLoading = useSelector((state) => state.auth.loading)
+  const userInfoLoading = useSelector((state) => state.userInfo.loading)
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const generalLoading = authLoading || userInfoLoading || themeLoading
 
   //user data input state
   const [userEmail, setUserEmail] = useState(email || "")
@@ -165,9 +172,9 @@ const MonthlyInfoScreen = ({ navigation }) => {
   }
 
   //VIEW
-  if (loading) {
+  if (generalLoading) {
     <View>
-
+      <CustomIndicator />
     </View>
   } else {
     return (

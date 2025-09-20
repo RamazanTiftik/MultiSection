@@ -68,61 +68,6 @@ const SignUpScreen = ({ navigation }) => {
     }, [navigation]);
 
 
-    //add income collection for user
-    const addIncomeForUser = async () => {
-        try {
-            //get current user id
-            const userId = auth.currentUser.uid;
-
-            //users/{userId}/income -> collection reference
-            const incomeRef = collection(db, "users", userId, "income");
-
-            //add document to income collection
-            const docRef = await addDoc(incomeRef, {
-                bankName: "",
-                createdDate: new Date(),
-                amount: "",
-                id: ""  // Şimdilik boş, birazdan set edeceğiz
-            });
-
-            //set document id
-            await updateDoc(docRef, {
-                id: docRef.id
-            });
-
-        } catch (error) {
-            Alert.alert("Hata", "Kullanıcı kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.")
-        }
-    };
-
-    //add income collection for user
-    const addOutcomeForUser = async () => {
-        try {
-            //get current user id
-            const userId = auth.currentUser.uid;
-
-            //users/{userId}/outcome -> collection reference
-            const outcomeRef = collection(db, "users", userId, "outcome");
-
-            //add document to outcome colection
-            const docRef = await addDoc(outcomeRef, {
-                bankName: "",
-                createdDate: new Date(),
-                amount: "",
-                id: ""
-            });
-
-            //set document id
-            await updateDoc(docRef, {
-                id: docRef.id
-            });
-
-        } catch (error) {
-            Alert.alert("Hata", "Kullanıcı kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.")
-        }
-    };
-
-
     //SignUp button handle
     const signUpBtnHandle = async () => {
         //inputs empty

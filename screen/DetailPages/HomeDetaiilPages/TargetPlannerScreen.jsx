@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -16,6 +16,7 @@ import CustomPopup from '../../../component/CustomPopup';
 import { useDispatch, useSelector } from 'react-redux';
 import { saveTargetPlan } from '../../../redux/slices/pluginSlice/TargetPlannerSlice';
 import CustomFlatList from '../../../component/CustomFlatlist';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 
 const plans = [
@@ -59,6 +60,11 @@ const TargetPlannerScreen = ({ navigation }) => {
     //theme - redux
     const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
     const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+
+    //general loading
+    const authLoading = useSelector((state) => state.auth.loading)
+    const themeLoading = useSelector((state) => state.theme.loading)
+    const generalLoading = authLoading || themeLoading
 
     //loading state
     const [loading, setLoading] = useState(false)
@@ -351,138 +357,147 @@ const TargetPlannerScreen = ({ navigation }) => {
 
 
     //VIEW
-    return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: secondaryColor }]}>
-            <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    if (generalLoading) {
+        return (
+            <View>
+                <CustomIndicator />
+            </View>
+        )
 
-                <Text style={styles.title}>🎯 Hedef Planlayıcı</Text>
+    } else {
+        return (
+            <SafeAreaView style={[styles.safeArea, { backgroundColor: secondaryColor }]}>
+                <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-                <TextInput
-                    placeholder="Hedef Adı"
-                    style={styles.input}
-                    value={goalName}
-                    onChangeText={setGoalName}
-                />
+                    <Text style={styles.title}>🎯 Hedef Planlayıcı</Text>
 
-                <TextInput
-                    placeholder="Hedef Tutarı (₺)"
-                    style={styles.input}
-                    keyboardType="numeric"
-                    value={goalAmount}
-                    onChangeText={setGoalAmount}
-                />
-
-
-                {/* Sabit ve Artan ödeme planları için aylık tasarruf */}
-                {(selectedPlan === 'fixed' || selectedPlan === 'increasing' || selectedPlan === 'downpayment') && (
                     <TextInput
-                        placeholder="Aylık Tasarruf Miktarı (₺)"
+                        placeholder="Hedef Adı"
+                        style={styles.input}
+                        value={goalName}
+                        onChangeText={setGoalName}
+                    />
+
+                    <TextInput
+                        placeholder="Hedef Tutarı (₺)"
                         style={styles.input}
                         keyboardType="numeric"
-                        value={monthlySave}
-                        onChangeText={setMonthlySave}
+                        value={goalAmount}
+                        onChangeText={setGoalAmount}
                     />
-                )}
 
 
-                {/* Peşinat planı için peşinat miktarı */}
-                {selectedPlan === 'downpayment' && (
-                    <TextInput
-                        placeholder="Peşinat Miktarı (₺)"
-                        style={styles.input}
-                        keyboardType="numeric"
-                        value={downpaymentPercent}
-                        onChangeText={setDownpaymentPercent}
-                    />
-                )}
-
-
-                {/* Tarih bazlı plan için hedef tarih */}
-                {selectedPlan === 'dateBased' && (
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <View style={{ flex: 1, marginRight: 5 }}>
-                            <CustomFlatList
-                                data={years}
-                                selectedValue={selectedYear}
-                                onValueChange={setSelectedYear}
-                                width={170}
-                            />
-                        </View>
-
-                        <View style={{ flex: 1, marginLeft: 5 }}>
-                            <CustomFlatList
-                                data={months}
-                                selectedValue={selectedMonth}
-                                onValueChange={setSelectedMonth}
-                                width={170}
-                            />
-                        </View>
-                    </View>
-                )}
-
-
-                <Text style={styles.subtitle}>🧮 Bir Plan Seç</Text>
-
-                {/* Plans */}
-                <FlatList
-                    data={plans}
-                    keyExtractor={(item) => item.id}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingRight: 16 }}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            style={[
-                                styles.planCard,
-                                selectedPlan === item.type && styles.planCardSelected,
-                            ]}
-                            onPress={() => handlePlanSelection(item.type)}
-                        >
-                            <Text style={styles.cardTitle}>{item.title}</Text>
-                            <Text style={styles.cardDesc}>{item.description}</Text>
-                        </TouchableOpacity>
+                    {/* Sabit ve Artan ödeme planları için aylık tasarruf */}
+                    {(selectedPlan === 'fixed' || selectedPlan === 'increasing' || selectedPlan === 'downpayment') && (
+                        <TextInput
+                            placeholder="Aylık Tasarruf Miktarı (₺)"
+                            style={styles.input}
+                            keyboardType="numeric"
+                            value={monthlySave}
+                            onChangeText={setMonthlySave}
+                        />
                     )}
-                />
 
 
-                {/* Calculate Button */}
-                <TouchableOpacity style={[styles.calculateButton, {backgroundColor: theme.summary1 || "#007bff"}]} onPress={handleCalculate}>
-                    <Text style={styles.buttonText}>Hesapla</Text>
-                </TouchableOpacity>
+                    {/* Peşinat planı için peşinat miktarı */}
+                    {selectedPlan === 'downpayment' && (
+                        <TextInput
+                            placeholder="Peşinat Miktarı (₺)"
+                            style={styles.input}
+                            keyboardType="numeric"
+                            value={downpaymentPercent}
+                            onChangeText={setDownpaymentPercent}
+                        />
+                    )}
 
 
-                {/* Target Plan Results */}
-                {planResult.length > 0 && (
-                    <View style={styles.planContainer}>
-                        <Text style={styles.planTitle}>📅 Aylık Plan ({goalName})</Text>
-                        {planResult.map((item) => (
-                            <View key={item.key} style={styles.planItem}>
-                                <Text>{item.ay}</Text>
-                                <Text>{item.birikim} ₺</Text>
+                    {/* Tarih bazlı plan için hedef tarih */}
+                    {selectedPlan === 'dateBased' && (
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flex: 1, marginRight: 5 }}>
+                                <CustomFlatList
+                                    data={years}
+                                    selectedValue={selectedYear}
+                                    onValueChange={setSelectedYear}
+                                    width={170}
+                                />
                             </View>
-                        ))}
-                    </View>
-                )}
+
+                            <View style={{ flex: 1, marginLeft: 5 }}>
+                                <CustomFlatList
+                                    data={months}
+                                    selectedValue={selectedMonth}
+                                    onValueChange={setSelectedMonth}
+                                    width={170}
+                                />
+                            </View>
+                        </View>
+                    )}
 
 
-                {/* Save Button */}
-                <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.income1 || "#28A745" }]} onPress={handleSave}>
-                    <Text style={styles.buttonText}>Kaydet</Text>
-                </TouchableOpacity>
+                    <Text style={styles.subtitle}>🧮 Bir Plan Seç</Text>
+
+                    {/* Plans */}
+                    <FlatList
+                        data={plans}
+                        keyExtractor={(item) => item.id}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingRight: 16 }}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                style={[
+                                    styles.planCard,
+                                    selectedPlan === item.type && styles.planCardSelected,
+                                ]}
+                                onPress={() => handlePlanSelection(item.type)}
+                            >
+                                <Text style={styles.cardTitle}>{item.title}</Text>
+                                <Text style={styles.cardDesc}>{item.description}</Text>
+                            </TouchableOpacity>
+                        )}
+                    />
 
 
-                {/* Custom Popup */}
-                <CustomPopup
-                    visible={showPopup}
-                    message={popupMessage}
-                    onClose={navigateHandle}
-                    type={popupType}
-                />
+                    {/* Calculate Button */}
+                    <TouchableOpacity style={[styles.calculateButton, { backgroundColor: theme.summary1 || "#007bff" }]} onPress={handleCalculate}>
+                        <Text style={styles.buttonText}>Hesapla</Text>
+                    </TouchableOpacity>
 
 
-            </ScrollView>
-        </SafeAreaView>
-    );
+                    {/* Target Plan Results */}
+                    {planResult.length > 0 && (
+                        <View style={styles.planContainer}>
+                            <Text style={styles.planTitle}>📅 Aylık Plan ({goalName})</Text>
+                            {planResult.map((item) => (
+                                <View key={item.key} style={styles.planItem}>
+                                    <Text>{item.ay}</Text>
+                                    <Text>{item.birikim} ₺</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+
+
+                    {/* Save Button */}
+                    <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.income1 || "#28A745" }]} onPress={handleSave}>
+                        <Text style={styles.buttonText}>Kaydet</Text>
+                    </TouchableOpacity>
+
+
+                    {/* Custom Popup */}
+                    <CustomPopup
+                        visible={showPopup}
+                        message={popupMessage}
+                        onClose={navigateHandle}
+                        type={popupType}
+                    />
+
+
+                </ScrollView>
+            </SafeAreaView>
+        );
+    }
 };
 
 

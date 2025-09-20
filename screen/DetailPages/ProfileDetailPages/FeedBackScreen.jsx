@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getUserInfoById } from '../../../redux/slices/UserInfoSlice';
 import { getAllFeedbacks, saveFeedback } from '../../../redux/slices/FeedbackSlice';
 import CustomPopup from '../../../component/CustomPopup';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 
 const FeedBackScreen = ({ navigation }) => {
@@ -32,8 +33,12 @@ const FeedBackScreen = ({ navigation }) => {
   const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
   const theme = useSelector(state => state.theme.themes[selectedThemeId]);
 
-  //loading state
-  const [loading, setLoading] = useState(false)
+  //general loading
+  const authLoading = useSelector((state) => state.auth.loading)
+  const userInfoLoading = useSelector((state) => state.userInfo.loading)
+  const themeLoading = useSelector((state) => state.theme.loading)
+  const feedbackLoading = useSelector((state) => state.feedback.loading)
+  const generalLoading = authLoading || userInfoLoading || themeLoading || feedbackLoading
 
   //modal visible
   const [modalVisible, setModalVisible] = useState(false);
@@ -89,10 +94,8 @@ const FeedBackScreen = ({ navigation }) => {
   //when screen is focused
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
       /* await getUserData() */
       await dispatch(getUserInfoById({ userId }))
-      setLoading(false)
     }
     fetchData()
   }, [])
@@ -100,10 +103,8 @@ const FeedBackScreen = ({ navigation }) => {
 
   //fetch feedbacks
   const fetchData = async () => {
-    setLoading(true)
     /* await getUserData() */
     await dispatch(getAllFeedbacks())
-    setLoading(false)
   }
 
   //when screen is focused
@@ -139,18 +140,9 @@ const FeedBackScreen = ({ navigation }) => {
       setHasFeedBackTextError(true);
 
     } else {
-      setLoading(true);
       saveFeedbackHandle()
-        .then(() => {
-          setLoading(false);
-          /* navigation.reset({
-            index: 0,
-            routes: [{ name: "MyProfile" }]
-          }); */
-        })
         .catch((error) => {
           console.error("Error setting user data:", error);
-          setLoading(false);
         });
     }
   }
@@ -169,9 +161,9 @@ const FeedBackScreen = ({ navigation }) => {
 
 
   //VIEW
-  if (loading) {
+  if (generalLoading) {
     <View>
-
+      <CustomIndicator />
     </View>
 
   } else {

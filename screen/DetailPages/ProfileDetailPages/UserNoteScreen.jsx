@@ -7,6 +7,7 @@ import Input from '../../../component/Input';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUserNotes, saveUserNote } from '../../../redux/slices/UserNoteSlice';
 import UserNoteRow from '../../../component/FlatListRow/UserNoteRow';
+import CustomIndicator from '../../../component/CustomIndicator';
 
 
 const UserNoteScreen = ({ navigation }) => {
@@ -28,6 +29,11 @@ const UserNoteScreen = ({ navigation }) => {
     //theme - redux
     const selectedThemeId = useSelector(state => state.theme.selectedThemeId);
     const theme = useSelector(state => state.theme.themes[selectedThemeId]);
+    //general loading
+    const authLoading = useSelector((state) => state.auth.loading)
+    const userNoteLoading = useSelector((state) => state.userNote.loading)
+    const themeLoading = useSelector((state) => state.theme.loading)
+    const generalLoading = authLoading || userNoteLoading || themeLoading
 
 
     //Back Button Func
@@ -126,49 +132,58 @@ const UserNoteScreen = ({ navigation }) => {
 
 
     //VIEW
-    return (
-        <CustomContainer>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Not Ekle</Text>
-                        <Input
-                            label={"Notunuzu yazınız"}
-                            onUpdateValue={updateInput.bind(this, "noteText")}
-                            value={noteText}
-                            hasError={hasNoteTextError}
-                            maxLength={500}
-                            width={320}
-                        />
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <TouchableOpacity onPress={cancelNote}>
-                                <Text style={styles.cancelButton}>İptal</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={saveNote}>
-                                <Text style={styles.saveButton}>Kaydet</Text>
-                            </TouchableOpacity>
+    if (generalLoading) {
+        return (
+            <View>
+                <CustomIndicator />
+            </View>
+        )
+
+    } else {
+        return (
+            <CustomContainer>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Not Ekle</Text>
+                            <Input
+                                label={"Notunuzu yazınız"}
+                                onUpdateValue={updateInput.bind(this, "noteText")}
+                                value={noteText}
+                                hasError={hasNoteTextError}
+                                maxLength={500}
+                                width={320}
+                            />
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TouchableOpacity onPress={cancelNote}>
+                                    <Text style={styles.cancelButton}>İptal</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={saveNote}>
+                                    <Text style={styles.saveButton}>Kaydet</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
+                </Modal>
+
+
+                {/* User Notes */}
+                <View style={styles.notesContainer}>
+                    {userNotes.map((item) => (
+                        <UserNoteRow key={item.id} content={item.content} onPress={() => noteCardClickHandle(item.id)} />
+                    ))}
                 </View>
-            </Modal>
 
 
-            {/* User Notes */}
-            <View style={styles.notesContainer}>
-                {userNotes.map((item) => (
-                    <UserNoteRow key={item.id} content={item.content} onPress={() => noteCardClickHandle(item.id)} />
-                ))}
-            </View>
+            </CustomContainer>
 
-
-        </CustomContainer>
-
-    )
+        )
+    }
 }
 
 export default UserNoteScreen
